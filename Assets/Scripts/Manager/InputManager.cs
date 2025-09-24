@@ -98,6 +98,12 @@ public class InputManager : MonoBehaviour
         return dir;
     }
 
+    // 마우스 포인터 위치 반환
+    public Vector2 MousePointerDirNormalized()
+    {
+        return playerInput.Player.Look.ReadValue<Vector2>().normalized;
+    }
+
     /*public Vector2 CameraDirNormalized()
     {
         return playerInput.Player.Look.ReadValue<Vector2>().normalized;
