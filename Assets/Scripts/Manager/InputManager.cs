@@ -7,7 +7,9 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set;}
 
-    public event EventHandler OnAttack;
+    public event EventHandler OnMoveInput; // 움직임 입력
+    public event EventHandler OnMoveOutput; // 움직임 해제
+    //public event EventHandler OnAttack;
 
     public PlayerInput playerInput {  get; private set; }
     public bool connectGamePad { get; private set; } = false;
@@ -21,7 +23,19 @@ public class InputManager : MonoBehaviour
         playerInput = new PlayerInput();
         playerInput.Player.Enable();
 
+        playerInput.Player.Move.started += Move_started;
+        playerInput.Player.Move.canceled += Move_canceled;
         //playerInput.Player.Pause.performed += Pause_performed;
+    }
+
+    private void Move_canceled(InputAction.CallbackContext obj)
+    {
+        OnMoveOutput?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Move_started(InputAction.CallbackContext obj)
+    {
+        OnMoveInput?.Invoke(this, EventArgs.Empty);
     }
 
     private void Pause_performed(InputAction.CallbackContext obj)
@@ -31,7 +45,7 @@ public class InputManager : MonoBehaviour
 
     private void Attack_performed(InputAction.CallbackContext obj)
     {
-        OnAttack?.Invoke(this, EventArgs.Empty);
+        //OnAttack?.Invoke(this, EventArgs.Empty);
     }
 
     private void Start()
