@@ -33,7 +33,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Glow_Intensity: 2
+    - _Glow_Intensity: 19
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EdgeTint: {r: 0.5, g: 0.8, b: 1, a: 1}
