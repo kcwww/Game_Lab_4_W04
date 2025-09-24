@@ -103,10 +103,5 @@ public class InputManager : MonoBehaviour
     {
         return playerInput.Player.Look.ReadValue<Vector2>().normalized;
     }
-
-    /*public Vector2 CameraDirNormalized()
-    {
-        return playerInput.Player.Look.ReadValue<Vector2>().normalized;
-    }*/
 }
 

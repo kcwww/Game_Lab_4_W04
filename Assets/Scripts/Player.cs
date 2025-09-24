@@ -31,7 +31,7 @@ public class Player : MonoBehaviour
     }
     private void LateUpdate()
     {
-        Rotation();
+        //Rotation();
     }
 
     // 움직임 처리
