@@ -6,26 +6,49 @@ public class TPSCamera : MonoBehaviour
     [Header("Compenent")]
     private CinemachineCamera cam;
     private CinemachineOrbitalFollow orbital;
+    private CinemachineInputAxisController inputAxis;
 
-    [Header("Zoom")]
-    [SerializeField] private float zoomSpeed = 2f;
-    [SerializeField] private float zoomLerpSpeed = 10f;
-    [SerializeField] private float minDistance = 3f;
-    [SerializeField] private float maxDistance = 10f;
-    private Vector2 scrollDelta;
-    private Vector2 scrollPostion;
+    private const float defaultGain = 1.25f;
+    private float currentGain = 1.25f; // 현재 회전 속도
 
-    private float targetZoom;
-    private float currentZoom;
-
-    void Start()
+    private void Awake()
     {
-        //InputManager.Instance.
+        cam = GetComponent<CinemachineCamera>();
+        orbital = GetComponent<CinemachineOrbitalFollow>();
+        inputAxis = GetComponent<CinemachineInputAxisController>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        Player.Instance.OnParrying += Player_OnParrying;
+        Player.Instance.OnParryingEnd += Player_OnParryingEnd;
+    }
+
+    private void Player_OnParryingEnd(object sender, System.EventArgs e)
+    {
+        OnRotation();
+    }
+
+    private void Player_OnParrying(object sender, System.EventArgs e)
+    {
+        OffRotation();
+    }
+
+    private void Update()
+    {
+
+    }
+
+    public void OnRotation()
+    {
+        inputAxis.enabled = true
+            
+            
+            ;
+    }
+
+    public void OffRotation()
+    {
+        inputAxis.enabled = false;
     }
 }

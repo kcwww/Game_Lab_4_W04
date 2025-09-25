@@ -38,8 +38,9 @@ public class Player : MonoBehaviour
     private const float parryingTimer = 0.15f; // 패링 중 반격을 진행할 시간, (스케일이 다 달라서 보정이 들어간 시간이 좋을듯)
     public bool parryingSucces { get; private set; } = true;// 패링의 성공 여부 판단 변수
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
-    public event EventHandler<float> OnParrying; // 주변 객체들의 정보를 담을 이벤트
-    public event EventHandler OnParryEnd; // 패링 끝날 때
+    public event EventHandler<float> CheckParringDistance; // 패링 객체들의 거리를 판단
+    public event EventHandler OnParrying; // 패링 실행 때 실행할 함수
+    public event EventHandler OnParryingEnd; // 패링 끝날 때
 
     [Header("Jump")]
     private const float jumpPower = 15f;
@@ -81,12 +82,14 @@ public class Player : MonoBehaviour
         parryingSucces = true;
 
         // 2. 패링 물체 확인
-        OnParrying?.Invoke(this, parryingWaitTimer); // 주변 충돌 객체들의 패링 참고
+        CheckParringDistance?.Invoke(this, parryingWaitTimer); // 주변 충돌 객체들의 패링 참고
 
         // 3. 하나라도 패링 시전 시간보다 이전에 도착하면 리턴
         if (!parryingSucces) return; // 패링을 실패하면 리턴
 
         // 4. 조건을 만족하면 패링 실행
+        OnParrying?.Invoke(this, EventArgs.Empty);
+
         isParrying = true; // 패링 활성화
         curParryingTimer = parryingTimer; // 패링 타이머 초기화
         parryingBoxTrigger.gameObject.SetActive(true);
@@ -130,7 +133,7 @@ public class Player : MonoBehaviour
                 isParrying = false;
                 parryingSucces = false;
                 parryingBoxTrigger.SetActive(false);
-                OnParryEnd?.Invoke(this, EventArgs.Empty);
+                OnParryingEnd?.Invoke(this, EventArgs.Empty);
             }
         }
     }

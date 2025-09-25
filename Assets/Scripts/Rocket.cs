@@ -18,16 +18,16 @@ public class Rocket : MonoBehaviour, IParrying
 
     private void Start()
     {
-        Player.Instance.OnParrying += Player_OnParrying;
-        Player.Instance.OnParryEnd += Player_EndParrying;
+        Player.Instance.CheckParringDistance += Player_OnParrying;
+        Player.Instance.OnParryingEnd += Player_EndParrying;
 
         target = Player.Instance.transform;
     }
 
     private void OnDisable()
     {
-        Player.Instance.OnParrying -= Player_OnParrying;
-        Player.Instance.OnParryEnd -= Player_EndParrying;
+        Player.Instance.CheckParringDistance -= Player_OnParrying;
+        Player.Instance.OnParryingEnd -= Player_EndParrying;
     }
 
     private void Player_EndParrying(object sender, System.EventArgs e)
