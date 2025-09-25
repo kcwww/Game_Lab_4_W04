@@ -4,6 +4,7 @@ using UnityEditor;
 #endif
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.VFX;
 
 /// <summary>
 /// ─ Three-in-one PostFX pulse coordinator with Presets & Stagger & Conflict Policy ─
@@ -38,6 +39,8 @@ public class PostProcessingManager : MonoBehaviour
     readonly Queue<PostFXPreset> presetQueue = new Queue<PostFXPreset>();
     Coroutine currentRoutine;
 
+    public VisualEffect tempVFX; // for editor preview
+
     // ───────────────────────── Public API ─────────────────────────
 
     [ContextMenu("Pulse Default Preset")]
@@ -48,6 +51,9 @@ public class PostProcessingManager : MonoBehaviour
             Debug.LogWarning("No defaultPreset assigned.");
             return;
         }
+
+        // temp
+        tempVFX.Play();
         PlayPreset(defaultPreset);
     }
 
