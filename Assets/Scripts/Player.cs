@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
     private Animator anim;
     [SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
     [field: SerializeField] public Transform followTarget { get; private set; }
-    [SerializeField] private GameObject parryingBoxTrigger; // 패링 박스 콜라이더
+    [field: SerializeField] public GameObject parryingBoxTrigger { get; private set; } // 패링 박스 콜라이더
 
     [Header("Const")]
     private const string WalkAnim = "isWalk";
@@ -41,6 +41,10 @@ public class Player : MonoBehaviour
     public event EventHandler<float> OnParrying; // 주변 객체들의 정보를 담을 이벤트
     public event EventHandler OnParryEnd; // 패링 끝날 때
 
+    [Header("Jump")]
+    private const float jumpPower = 15f;
+    private bool isGround = false;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -59,6 +63,14 @@ public class Player : MonoBehaviour
         InputManager.Instance.OnParrying += InputManager_OnParrying;
         InputManager.Instance.OnRun += (a, b) => isRun = true;
         InputManager.Instance.OffRun += (a, b) => isRun = false;
+        InputManager.Instance.OnJump += InputManager_OnJump;
+    }
+
+    private void InputManager_OnJump(object sender, EventArgs e)
+    {
+        if (!isGround) return;
+        isGround = false;
+        rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
     }
 
     private void InputManager_OnParrying(object sender, System.EventArgs e)
@@ -168,4 +180,12 @@ public class Player : MonoBehaviour
     }
 
     //public bool GetParryingComplete => curParryingTimer >= 0f;
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGround = true;
+        }
+    }
 }

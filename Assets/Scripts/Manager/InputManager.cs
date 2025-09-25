@@ -11,6 +11,7 @@ public class InputManager : MonoBehaviour
     public event EventHandler OffGuard;
     public event EventHandler OnRun;
     public event EventHandler OffRun;
+    public event EventHandler OnJump;
     public event EventHandler OnParrying; // 패링입력
 
     public PlayerInput playerInput {  get; private set; }
@@ -32,17 +33,24 @@ public class InputManager : MonoBehaviour
         playerInput.Player.Run.started += Run_started;
         playerInput.Player.Run.canceled += Run_canceled;
 
+        playerInput.Player.Jump.performed += Jump_performed;
+
         playerInput.Player.Parrying.performed += Parrying_performed;
+    }
+
+    private void Jump_performed(InputAction.CallbackContext obj)
+    {
+        OnJump?.Invoke(this, EventArgs.Empty);
     }
 
     private void Run_canceled(InputAction.CallbackContext obj)
     {
-        OffRun(this, EventArgs.Empty);
+        OffRun?.Invoke(this, EventArgs.Empty);
     }
 
     private void Run_started(InputAction.CallbackContext obj)
     {
-        OnRun(this, EventArgs.Empty);
+        OnRun?.Invoke(this, EventArgs.Empty);
     }
 
     private void Parrying_performed(InputAction.CallbackContext obj)
@@ -92,6 +100,8 @@ public class InputManager : MonoBehaviour
 
         playerInput.Player.Run.started -= Run_started;
         playerInput.Player.Run.canceled -= Run_canceled;
+
+        playerInput.Player.Jump.performed -= Jump_performed;
 
         playerInput.Dispose();
     }
