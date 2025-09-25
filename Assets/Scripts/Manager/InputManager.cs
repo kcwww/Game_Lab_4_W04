@@ -9,6 +9,8 @@ public class InputManager : MonoBehaviour
 
     public event EventHandler OnGuard;
     public event EventHandler OffGuard;
+    public event EventHandler OnRun;
+    public event EventHandler OffRun;
     public event EventHandler OnParrying; // 패링입력
 
     public PlayerInput playerInput {  get; private set; }
@@ -27,7 +29,20 @@ public class InputManager : MonoBehaviour
         playerInput.Player.Guard.started += Guard_performed; // 가드 시작
         playerInput.Player.Guard.canceled += Guard_canceled; // 가드 해제(수동)
 
+        playerInput.Player.Run.started += Run_started;
+        playerInput.Player.Run.canceled += Run_canceled;
+
         playerInput.Player.Parrying.performed += Parrying_performed;
+    }
+
+    private void Run_canceled(InputAction.CallbackContext obj)
+    {
+        OffRun(this, EventArgs.Empty);
+    }
+
+    private void Run_started(InputAction.CallbackContext obj)
+    {
+        OnRun(this, EventArgs.Empty);
     }
 
     private void Parrying_performed(InputAction.CallbackContext obj)
@@ -38,8 +53,6 @@ public class InputManager : MonoBehaviour
     private void Guard_canceled(InputAction.CallbackContext obj)
     {
         OffGuard?.Invoke(this, EventArgs.Empty);
-
-
     }
 
     private void Guard_performed(InputAction.CallbackContext obj)
@@ -76,6 +89,9 @@ public class InputManager : MonoBehaviour
         //playerInput.Player.Pause.performed -= Pause_performed;
         playerInput.Player.Guard.started -= Guard_performed;
         playerInput.Player.Guard.canceled -= Guard_canceled;
+
+        playerInput.Player.Run.started -= Run_started;
+        playerInput.Player.Run.canceled -= Run_canceled;
 
         playerInput.Dispose();
     }
