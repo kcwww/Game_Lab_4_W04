@@ -7,9 +7,9 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set;}
 
-    public event EventHandler OnMoveInput; // 움직임 입력
-    public event EventHandler OnMoveOutput; // 움직임 해제
-    //public event EventHandler OnAttack;
+    public event EventHandler OnGuard;
+    public event EventHandler OffGuard;
+    public event EventHandler OnParrying; // 패링입력
 
     public PlayerInput playerInput {  get; private set; }
     public bool connectGamePad { get; private set; } = false;
@@ -23,33 +23,33 @@ public class InputManager : MonoBehaviour
         playerInput = new PlayerInput();
         playerInput.Player.Enable();
 
-        playerInput.Player.Move.started += Move_started;
-        playerInput.Player.Move.canceled += Move_canceled;
-        //playerInput.Player.Pause.performed += Pause_performed;
+        // performed는 조건에 만족할 때 실행(별다른 input 시스템을 설정한 게 아니므로 started와 동일)
+        playerInput.Player.Guard.started += Guard_performed; // 가드 시작
+        playerInput.Player.Guard.canceled += Guard_canceled; // 가드 해제(수동)
+
+        playerInput.Player.Parrying.performed += Parrying_performed;
     }
 
-    private void Move_canceled(InputAction.CallbackContext obj)
+    private void Parrying_performed(InputAction.CallbackContext obj)
     {
-        OnMoveOutput?.Invoke(this, EventArgs.Empty);
+        OnParrying?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Move_started(InputAction.CallbackContext obj)
+    private void Guard_canceled(InputAction.CallbackContext obj)
     {
-        OnMoveInput?.Invoke(this, EventArgs.Empty);
+        OffGuard?.Invoke(this, EventArgs.Empty);
+
+
     }
 
-    private void Pause_performed(InputAction.CallbackContext obj)
+    private void Guard_performed(InputAction.CallbackContext obj)
     {
-       // OnPause?.Invoke(this, EventArgs.Empty);
-    }
-
-    private void Attack_performed(InputAction.CallbackContext obj)
-    {
-        //OnAttack?.Invoke(this, EventArgs.Empty);
+        OnGuard?.Invoke(this, EventArgs.Empty);
     }
 
     private void Start()
     {
+        // 컨트롤러 체크
         foreach (var device in InputSystem.devices)
         {
             if (device is Gamepad)
@@ -74,10 +74,13 @@ public class InputManager : MonoBehaviour
     private void OnDestroy()
     {
         //playerInput.Player.Pause.performed -= Pause_performed;
+        playerInput.Player.Guard.started -= Guard_performed;
+        playerInput.Player.Guard.canceled -= Guard_canceled;
 
         playerInput.Dispose();
     }
 
+    // 디바이스가 변동되면 호출할 함수
     private void OnDeviceChange(InputDevice device, InputDeviceChange change)
     {
         if (device is Gamepad)
@@ -97,6 +100,8 @@ public class InputManager : MonoBehaviour
             }
         }
     }
+
+    // 패드 입력 전환
 
     private void ChangeDeviceState(bool isController)
     {
