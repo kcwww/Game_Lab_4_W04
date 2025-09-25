@@ -43,7 +43,8 @@ public class PostProcessingManager : MonoBehaviour
     Coroutine currentRoutine;
     Coroutine timeCoroutine;
 
-    public VisualEffect tempVFX; // for editor preview
+    public VisualEffect parryVFX; // for editor preview
+    public VisualEffect particleVFX;  // for hit effect
 
     // ───────────────────────── Public API ─────────────────────────
 
@@ -55,8 +56,11 @@ public class PostProcessingManager : MonoBehaviour
     [ContextMenu("Pulse Default Preset")]
     public void PulseDefault()
     {
-        tempVFX.transform.position = Player.Instance.followTarget.transform.position;
-        tempVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
+        parryVFX.transform.position = Player.Instance.followTarget.transform.position;
+        parryVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
+
+        particleVFX.transform.position = Player.Instance.followTarget.transform.position;
+        particleVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
 
         if (defaultPreset == null)
         {
@@ -64,8 +68,9 @@ public class PostProcessingManager : MonoBehaviour
             return;
         }
 
-        // temp
-        tempVFX.Play();
+        
+        parryVFX.Play();
+        particleVFX.Play();
 
         if (timeCoroutine != null) StopCoroutine(timeCoroutine);
         timeCoroutine = StartCoroutine(TimeCoroutine());
