@@ -45,8 +45,16 @@ MonoBehaviour:
   enableRadialBlur: 1
   chromaPeakIntensity: 0.3
   chromaStaggerMs: 0
-  dofTargetFocalLength: 300
+  dofTargetFocalLength: 200
   dofBackFocalLength: 0
   dofStaggerMs: 0
   radialPeakStrength: 1
   radialStaggerMs: 0
+  enableColorAdj: 1
+  colorStaggerMs: 0
+  colorExposureDelta: 0.6
+  colorFilterTarget: {r: 0.9103774, g: 0.9724238, b: 1, a: 1}
+  colorSaturationDelta: 10
+  colorAffectWB: 1
+  colorWBTempDelta: -5
+  colorWBTintDelta: -5

@@ -5,7 +5,7 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.VFX;
-using UnityEngine.SocialPlatforms;
+
 
 /// <summary>
 /// ─ Three-in-one PostFX pulse coordinator with Presets & Stagger & Conflict Policy ─
@@ -46,6 +46,10 @@ public class PostProcessingManager : MonoBehaviour
     public VisualEffect parryVFX; // for editor preview
     public VisualEffect particleVFX;  // for hit effect
 
+    [Header("Controllers (Add: ColorAdjust)")]
+    public ColorAdjustFilterController colorCtrl; // optional
+
+
     // ───────────────────────── Public API ─────────────────────────
 
     private void Awake()
@@ -69,8 +73,10 @@ public class PostProcessingManager : MonoBehaviour
         }
 
         
-        parryVFX.Play();
+        particleVFX.Stop();
+        particleVFX.Reinit();
         particleVFX.Play();
+        parryVFX.Play();
 
         if (timeCoroutine != null) StopCoroutine(timeCoroutine);
         timeCoroutine = StartCoroutine(TimeCoroutine());
@@ -162,7 +168,7 @@ public class PostProcessingManager : MonoBehaviour
         float totalDuration = Mathf.Max(0.01f, p.totalDuration);
 
         // 세 효과를 병렬로 시작(스태거가 있으면 내부에서 대기 후 시작)
-        var jobs = new List<Coroutine>(3);
+        var jobs = new List<Coroutine>(4); // 3 -> 4로
 
         if (p.enableChromatic && chroma)
             jobs.Add(StartCoroutine(CoStartChromaticAfterDelay(p)));
@@ -173,12 +179,19 @@ public class PostProcessingManager : MonoBehaviour
         if (p.enableRadialBlur && radial)
             jobs.Add(StartCoroutine(CoStartRadialAfterDelay(p)));
 
+        // ★ 추가: Color
+        if (p.enableColorAdj && colorCtrl)
+            jobs.Add(StartCoroutine(CoStartColorAfterDelay(p)));
+
+
         // 3) 완료 대기: preset 총 시간 + 최대 스태거(ms)
         float maxStagger = Mathf.Max(
             p.enableChromatic ? p.chromaStaggerMs : 0,
             p.enableDoF ? p.dofStaggerMs : 0,
-            p.enableRadialBlur ? p.radialStaggerMs : 0
+            p.enableRadialBlur ? p.radialStaggerMs : 0,
+            p.enableColorAdj ? p.colorStaggerMs : 0   // ★ 추가
         ) / 1000f;
+
 
         float wait = totalDuration + maxStagger;
         float waited = 0f;
@@ -241,6 +254,16 @@ public class PostProcessingManager : MonoBehaviour
             radial.autoMirrorCurve = p.autoMirrorCurve;
             radial.pulseTotalDuration = p.totalDuration;
             radial.pulseCurve = p.masterCurve;
+        }
+
+        if (colorCtrl)
+        {
+            colorCtrl.unscaledTime = p.unscaledTime;
+            colorCtrl.useCurvePulse = p.useCurvePulse;      // 동일 커브 정책 사용
+            colorCtrl.autoMirrorCurve = p.autoMirrorCurve;
+            colorCtrl.pulseCurve = p.masterCurve;
+            colorCtrl.pulseTotalDuration = p.totalDuration;
+            colorCtrl.affectWhiteBalance = p.colorAffectWB;
         }
     }
 
@@ -326,6 +349,28 @@ public class PostProcessingManager : MonoBehaviour
         else
             radial.PulseAbsolute(p.radialPeakStrength, p.totalDuration);
     }
+
+    IEnumerator CoStartColorAfterDelay(PostFXPreset p)
+    {
+        // 지연 시작
+        yield return CoDelaySeconds(p.colorStaggerMs / 1000f, p.unscaledTime);
+        if (!colorCtrl) yield break;
+
+        // 안전하게 켜기 (overrideState 보장)
+        colorCtrl.SetEnabled(true);
+
+
+        colorCtrl.PulseFlashDecay(
+            p.colorExposureDelta,
+            p.colorFilterTarget,
+            p.colorSaturationDelta,
+            p.colorAffectWB ? p.colorWBTempDelta : 0f,
+            p.colorAffectWB ? p.colorWBTintDelta : 0f,
+            p.totalDuration,
+            linear: true
+        );
+    }
+
 
 #if UNITY_EDITOR
     void OnValidate()
