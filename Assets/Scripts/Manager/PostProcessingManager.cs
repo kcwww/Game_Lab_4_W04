@@ -61,10 +61,10 @@ public class PostProcessingManager : MonoBehaviour
     public void PulseDefault()
     {
         parryVFX.transform.position = Player.Instance.followTarget.transform.position;
-        parryVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
+        //parryVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
 
         particleVFX.transform.position = Player.Instance.followTarget.transform.position;
-        particleVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
+        //particleVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
 
         if (defaultPreset == null)
         {
