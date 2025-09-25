@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
     private Rigidbody rb;
     private Animator anim;
     [SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
-    [SerializeField] private Transform followTarget;
+    [field: SerializeField] public Transform followTarget { get; private set; }
     [SerializeField] private GameObject parryingBoxTrigger; // 패링 박스 콜라이더
 
     [Header("Const")]
@@ -32,13 +32,13 @@ public class Player : MonoBehaviour
     private const float guardTimer = 1f; // 1초의 딜레이
     public bool isGuard { get; private set; } = false;
 
-    //[Header("Parrying")]
-    public event EventHandler<float> OnParrying; // 주변 객체들의 정보를 담을 이벤트
+    [Header("Parrying")]
     private const float parryingWaitTimer = 0.35f; // 패링을 시도할 때까지 걸리는 시간 (이 시간보다 빠르게 도착하면 피격)
     private float curParryingTimer = 0; // 패링 중 반격을 진행할 시간
-    private const float parryingTimer = 0.5f; // 패링 중 반격을 진행할 시간, (스케일이 다 달라서 보정이 들어간 시간이 좋을듯)
+    private const float parryingTimer = 0.35f; // 패링 중 반격을 진행할 시간, (스케일이 다 달라서 보정이 들어간 시간이 좋을듯)
     public bool parryingSucces { get; private set; } = true;// 패링의 성공 여부 판단 변수
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
+    public event EventHandler<float> OnParrying; // 주변 객체들의 정보를 담을 이벤트
 
     private void Awake()
     {
@@ -80,7 +80,6 @@ public class Player : MonoBehaviour
 
         anim.SetBool(GuardAnim, false);
         isGuard = false;
-        anim.SetTrigger(ParryingAnim);
     }
 
     private void InputManager_OffGuard(object sender, System.EventArgs e)
@@ -111,6 +110,7 @@ public class Player : MonoBehaviour
         if (isParrying)
         {
             curParryingTimer -= Time.deltaTime; // 패링 지속 타이머 실행
+
             if(curParryingTimer < 0) // 패링 비활성화
             {
                 isParrying = false;
@@ -124,6 +124,8 @@ public class Player : MonoBehaviour
     // 움직임 처리(회전도 포함)
     public void Move()
     {
+        if (Time.timeScale != 1) return;
+
         Vector2 dir = InputManager.Instance.MoveDirNormalized();
         Vector3 inputDir;
 
@@ -157,6 +159,10 @@ public class Player : MonoBehaviour
         parryingSucces = false;
     }
 
+    public void ParryingAnimation()
+    {
+        anim.SetTrigger(ParryingAnim);
+    }
 
     //public bool GetParryingComplete => curParryingTimer >= 0f;
 }

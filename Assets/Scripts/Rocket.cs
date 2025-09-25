@@ -19,8 +19,14 @@ public class Rocket : MonoBehaviour, IParrying
     private void Start()
     {
         Player.Instance.OnParrying += Player_OnParrying;
+        //Player.Instance.EndParrying += Player_EndParrying;
 
         target = Player.Instance.transform;
+    }
+
+    private void Player_EndParrying(object sender, System.EventArgs e)
+    {
+        isParryingDamage = false;
     }
 
     private void FixedUpdate()
@@ -37,11 +43,7 @@ public class Rocket : MonoBehaviour, IParrying
 
     private void Update()
     {
-        if (isParryingDamage)
-        {
-            curParryingTimer -= Time.deltaTime;
-            if (curParryingTimer < 0f) isParryingDamage = false;
-        }
+        
     }
 
 
@@ -70,6 +72,13 @@ public class Rocket : MonoBehaviour, IParrying
 
     public void ParryingDamage()
     {
+        if (isParryingDamage) return;
+
+        Debug.Log("AI 패링 진행");
+
+        Player.Instance.ParryingAnimation();
+
+        PostProcessingManager.Instance.PulseDefault();
         isParryingDamage = true;
         curParryingTimer = parryingTimer;
 
@@ -87,5 +96,10 @@ public class Rocket : MonoBehaviour, IParrying
             }
             else Debug.Log("패링 실패!!!!");
         }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player")) if (isParryingDamage) isParryingDamage = false;
     }
 }

@@ -5,6 +5,7 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.VFX;
+using UnityEngine.SocialPlatforms;
 
 /// <summary>
 /// ─ Three-in-one PostFX pulse coordinator with Presets & Stagger & Conflict Policy ─
@@ -21,6 +22,8 @@ using UnityEngine.VFX;
 [DisallowMultipleComponent]
 public class PostProcessingManager : MonoBehaviour
 {
+    public static PostProcessingManager Instance { get; private set; }
+
     public enum PulseConflictPolicy { Overwrite, Ignore, Queue }
 
     [Header("Controller References")]
@@ -38,14 +41,23 @@ public class PostProcessingManager : MonoBehaviour
     bool isPulsing;
     readonly Queue<PostFXPreset> presetQueue = new Queue<PostFXPreset>();
     Coroutine currentRoutine;
+    Coroutine timeCoroutine;
 
     public VisualEffect tempVFX; // for editor preview
 
     // ───────────────────────── Public API ─────────────────────────
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+    }
+
     [ContextMenu("Pulse Default Preset")]
     public void PulseDefault()
     {
+        tempVFX.transform.position = Player.Instance.followTarget.transform.position;
+        tempVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
+
         if (defaultPreset == null)
         {
             Debug.LogWarning("No defaultPreset assigned.");
@@ -54,8 +66,36 @@ public class PostProcessingManager : MonoBehaviour
 
         // temp
         tempVFX.Play();
+
+        if (timeCoroutine != null) StopCoroutine(timeCoroutine);
+        timeCoroutine = StartCoroutine(TimeCoroutine());
+        // temp
+        // 바로 1초동안 돌아오게 코루틴
+
         PlayPreset(defaultPreset);
     }
+
+    private IEnumerator TimeCoroutine()
+    {
+        Time.timeScale = 0.1f;
+
+        yield return new WaitForSecondsRealtime(0.85f);
+
+        float duration = 0.3f; // 0.1초만에 복구하고 싶다면
+        float elapsed = 0f;
+        float start = 0.5f;
+        float end = 1f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime; // timeScale 영향 안 받게
+            Time.timeScale = Mathf.Lerp(start, end, elapsed / duration);
+            yield return null;
+        }
+
+        Time.timeScale = 1f; // 보정
+    }
+
 
     public void PlayPreset(PostFXPreset preset)
     {
