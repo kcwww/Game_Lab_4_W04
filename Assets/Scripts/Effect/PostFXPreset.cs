@@ -39,4 +39,21 @@ public class PostFXPreset : ScriptableObject
     [Header("Radial Blur (Peak Strength)")]
     [Range(0f, 1f)] public float radialPeakStrength = 0.80f;
     [Tooltip("시작 지연(ms)")] public int radialStaggerMs = 0;
+
+    // ... 기존 필드들 위/아래 적절 위치에 추가 ...
+
+    [Header("Color Adjustments Preset")]
+    public bool enableColorAdj = true;
+    [Tooltip("컬러 조정 시작 지연(ms)")]
+    public int colorStaggerMs = 0;
+
+    // 델타/타깃값 (Blue Flash 용)
+    [Tooltip("Post Exposure 가산(예:+0.6)")] public float colorExposureDelta = 0.6f;
+    [Tooltip("Color Filter 타깃(HDR Color)")] public Color colorFilterTarget = new Color(0.4f, 0.82f, 1f, 1f);
+    [Tooltip("Saturation 가산(예:+10)")] public float colorSaturationDelta = 10f;
+
+    [Tooltip("화이트 밸런스도 적용할지")] public bool colorAffectWB = true;
+    [Tooltip("WB Temperature 가산(예:-5)")] public float colorWBTempDelta = -5f;
+    [Tooltip("WB Tint 가산(예:-5)")] public float colorWBTintDelta = -5f;
+
 }

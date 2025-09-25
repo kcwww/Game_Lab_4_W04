@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3276258501984368722}
   - component: {fileID: 247384735922121635}
   - component: {fileID: 6540962859153877810}
+  - component: {fileID: 3810838810276641443}
   m_Layer: 0
   m_Name: PostProcessingManager
   m_TagString: Untagged
@@ -52,6 +53,9 @@ MonoBehaviour:
   radial: {fileID: 6540962859153877810}
   defaultPreset: {fileID: 11400000, guid: 8f1695d6535aa9a4184db8f316b3ccab, type: 2}
   conflictPolicy: 0
+  parryVFX: {fileID: 0}
+  particleVFX: {fileID: 0}
+  colorCtrl: {fileID: 3810838810276641443}
 --- !u!114 &3276258501984368722
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,3 +201,45 @@ MonoBehaviour:
   unscaledTime: 1
   editorPeakStrength: 0.8
   editorDuration: 0.4
+--- !u!114 &3810838810276641443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5401571812069345052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd3e3d3a0e93eac4badafb5110e699cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  globalVolume: {fileID: 0}
+  unscaledTime: 1
+  useCurvePulse: 1
+  pulseTotalDuration: 0.18
+  pulseCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  autoMirrorCurve: 1
+  affectWhiteBalance: 1
