@@ -43,11 +43,11 @@ public class Player : MonoBehaviour
 
     private void OnMoveInput()
     {
-        if (isMoveInput) return;
-        isMoveInput = true;
+        //if (isMoveInput) return;
+        //isMoveInput = true;
 
-        moveForward = Vector3.ProjectOnPlane(followCamera.transform.forward, Vector3.up).normalized;
-        moveRight = Vector3.ProjectOnPlane(followCamera.transform.right, Vector3.up).normalized;
+        //moveForward = Vector3.ProjectOnPlane(followCamera.transform.forward, Vector3.up).normalized;
+        //moveRight = Vector3.ProjectOnPlane(followCamera.transform.right, Vector3.up).normalized;
     }
 
 
@@ -60,10 +60,12 @@ public class Player : MonoBehaviour
         if (dir == Vector2.zero)
         {
             moveDir = Vector2.zero;
-            isMoveInput = false;
+            //isMoveInput = false;
             return;
         }
 
+        moveForward = Vector3.ProjectOnPlane(followCamera.transform.forward, Vector3.up).normalized;
+        moveRight = Vector3.ProjectOnPlane(followCamera.transform.right, Vector3.up).normalized;
         inputDir = moveRight * dir.x + moveForward * dir.y;
 
         rb.MovePosition(rb.position + inputDir.normalized * speed * Time.fixedDeltaTime);

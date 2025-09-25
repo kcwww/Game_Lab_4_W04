@@ -25,6 +25,32 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!1102 &-7895194604091105913
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PlayerParrying
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: 81373536c432100488018a59e7109f80, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
 --- !u!1101 &-7761960286844496134
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -367,6 +393,9 @@ AnimatorStateMachine:
   - serializedVersion: 1
     m_State: {fileID: 5833944138668213914}
     m_Position: {x: 610, y: -120, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: -7895194604091105913}
+    m_Position: {x: -600, y: -100, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: 2521610958295585172}
