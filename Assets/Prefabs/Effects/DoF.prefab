@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8638208489368906120
+--- !u!1 &6657590537511805688
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4750744323401021857}
-  - component: {fileID: 6358500342983198841}
+  - component: {fileID: 2678695554789361709}
+  - component: {fileID: 6099317521913691126}
   m_Layer: 0
-  m_Name: Radial Blur
+  m_Name: DoF
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4750744323401021857
+--- !u!4 &2678695554789361709
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8638208489368906120}
+  m_GameObject: {fileID: 6657590537511805688}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,31 +32,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6358500342983198841
+--- !u!114 &6099317521913691126
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8638208489368906120}
+  m_GameObject: {fileID: 6657590537511805688}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e93edfd8ffb10534ebe90c67e9ff1f78, type: 3}
+  m_Script: {fileID: 11500000, guid: 1850aa6985f3cbe43a5e3e6a869bd33e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  radialBlurMat: {fileID: 2100000, guid: 5a5ec832e9a5aff4595aacc7dd06d103, type: 2}
-  targetCamera: {fileID: 0}
-  focusTarget: {fileID: 0}
-  centerOffsetY: 0.06
-  blurStart: 1
-  blurWidth: 0.1
-  sampleCount: 12
-  blurStrength: 0.07649309
-  radius: 0.1
-  feather: 0.104
-  invertCenterBlur: 1
+  player: {fileID: 0}
+  mainCamera: {fileID: 0}
+  globalVolume: {fileID: 0}
+  focusLerpSpeed: 10
+  focusDistanceClamp: {x: 0.1, y: 100}
+  baseFocalLength: 85
+  pulseTargetFocalLength: 300
+  pulseUpDuration: 0.5
+  pulseDownDuration: 0.5
+  pulseAperture: 2
   useCurvePulse: 1
-  pulseTotalDuration: 0.4
+  pulseTotalDuration: 1.5
   pulseCurve:
     serializedVersion: 2
     m_Curve:
@@ -83,5 +82,3 @@ MonoBehaviour:
     m_RotationOrder: 4
   autoMirrorCurve: 1
   unscaledTime: 1
-  editorPeakStrength: 1
-  editorDuration: 2
