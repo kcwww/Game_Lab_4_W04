@@ -1,7 +1,8 @@
 using System.Collections;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
-public class Boss : MonoBehaviour
+public class Boss : MonoBehaviour//, IParrying
 {
     public static Boss Instance { get; private set; }
 
@@ -17,6 +18,7 @@ public class Boss : MonoBehaviour
 
     [Header("Parrying")]
     public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
+    private bool isParryingDamage = false; // 패링 데미지 들어온지 여부
 
     [Header("Attack")]
     private float attackRange = 10f; // 공격 탐지 거리
@@ -42,10 +44,30 @@ public class Boss : MonoBehaviour
     private void Start()
     {
         target = Player.Instance.transform;
+
+        Player.Instance.CheckParringDistance += Player_CheckParringDistance;
+        Player.Instance.OnParryingEnd += Player_EndParrying;
+    }
+
+    private void Player_EndParrying(object sender, System.EventArgs e)
+    {
+        isParryingDamage = false;
+    }
+
+    private void Player_CheckParringDistance(object sender, System.EventArgs e)
+    {
+        Player.Instance.AddEnemy(rb);
+    }
+
+    private void OnDisable()
+    {
+        Player.Instance.CheckParringDistance -= Player_CheckParringDistance;
+        Player.Instance.OnParryingEnd -= Player_EndParrying;
     }
 
     private void FixedUpdate()
     {
+        if (isParryingDamage) return;
         Move();
         Attack();
     }
@@ -120,10 +142,11 @@ public class Boss : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
         anim.SetTrigger(SmashAnim);
 
-        float dashDuration = 0.5f; // 대시 시간
+        isParrying = true; // 패링 타격 받기
+        float dashDuration = 0.3f; // 대시 시간
         float elapsed = 0f;
 
-        while (elapsed < dashDuration)
+        /*while (elapsed < dashDuration || isParryingDamage)
         {
             elapsed += Time.fixedDeltaTime;
             float t = elapsed / dashDuration;
@@ -131,10 +154,22 @@ public class Boss : MonoBehaviour
             rb.MovePosition(newPos);
 
             yield return new WaitForFixedUpdate();
+        }*/
+
+        //rb.linearVelocity = dir * horizontalSpeed;
+
+        while (elapsed < dashDuration && !isParryingDamage)
+        {
+            elapsed += Time.fixedDeltaTime;
+
+            float t = elapsed / dashDuration;
+            // 처음부터 끝까지 일정하게 빠르게 (쓸림 X, 급가속 X)
+            rb.MovePosition(Vector3.Lerp(startPos, endPos, t));
+            yield return new WaitForFixedUpdate();
         }
 
-        // 마지막 위치 보정
-        rb.MovePosition(endPos);
+
+        if (!isParryingDamage) rb.MovePosition(endPos); // 패링을 실패했을 때 마지막 위치 보정
 
         // 4. 대시 끝
         isAttack = false;
@@ -142,4 +177,29 @@ public class Boss : MonoBehaviour
         yield return null;
     }
 
+    public void ParryingDamage()
+    {
+        if (!isParrying) return; // 패링 활성화가 아니라면 리턴
+        if (isParryingDamage) return; // 이미 맞은 상태라면
+
+        rb.linearVelocity = Vector3.zero;
+
+        PostProcessingManager.Instance.PulseDefault();
+        isParryingDamage = true;
+
+        rb.AddForce((rb.position - target.position).normalized * 45, ForceMode.Impulse);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("Player"))
+        {
+            if (Player.Instance.parryingSucces) // 판정 성공일때만 진행
+            {
+                InputManager.Instance.OnMotor();
+                Player.Instance.StartParrying();
+                ParryingDamage();
+            }
+        }
+    }
 }

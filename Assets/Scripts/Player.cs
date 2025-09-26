@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -42,19 +43,13 @@ public class Player : MonoBehaviour
     public bool parryingEmpty { get; private set; } = true; // 패링이 끝날 때까지 도달할 객체가 없는지 판단 변수
     public bool parryingSucces { get; private set; } = false;// 패링의 성공 여부 판단 변수
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
-    public event EventHandler<ParryingEventArgs> CheckParringDistance; // 패링 객체들의 거리를 판단
+    private List<Rigidbody> enemys = new List<Rigidbody>();
+    public event EventHandler CheckParringDistance; // 패링 객체들의 거리를 판단
     public event EventHandler OnParrying; // 패링이 실행될 때 같이 진행할 이벤트 목록
     public event EventHandler OnParryingEnd; // 패링 끝날 때 같이 끝낼 이벤트 목록
 
     [Header("Lock On")]
     public LockOnOrchestrator lockOnOrchestrator;
-
-    public class ParryingEventArgs : EventArgs
-    {
-        public float parryingFailDistance;
-        public float parryingRange;
-        public float parryingAnimationTimer;
-    }
 
     [Header("Jump")]
     private const float jumpPower = 15f;
@@ -101,24 +96,45 @@ public class Player : MonoBehaviour
     }
 
     // 패링 키 입력
-    private void InputManager_OnParrying(object sender, System.EventArgs e)
+    private void InputManager_OnParrying(object sender, EventArgs e)
     {     
         // 1. 패링 기본 조건 파악(가드 여부)
         if (!isGuard) return; // 가드중이 아니라면 return
 
+        enemys.Clear(); // 적 리스트 초기화
+
         parryingSucces = true; // 성공 초기화
         parryingEmpty = true; // 근처 객체 여부 초기화
+        //isParrying = true; // 패링중인지 변수 초기화
 
-        // 2. 패링 물체 확인
-        CheckParringDistance?.Invoke(this, new ParryingEventArgs
-        { 
-            parryingFailDistance = parryingFailDistance,
-            parryingRange = parryingRange,
-            parryingAnimationTimer = parryingAnimationTimer,
-        }); // 주변 충돌 객체들의 패링 참고
+        CheckParringDistance?.Invoke(this, e); // 구독 이벤트 전ㅇ달
+
+        CheckParring(); // 패링 체크 함수
+
+        // 패링에 성공했다면
+        if(parryingSucces)
+        {
+            SuccessParrying(); // 활성화
+
+            if(parryingEmpty) // 근처에 없는 경우
+            {
+                StartParrying();
+            }
+
+            Debug.Log("패링 성공");
+        }
+        /*else // 실패했는데
+        {
+            if(parryingEmpty) // 근처에 패링 객체가 없다면
+            {
+                SuccessParrying(); // 헛방
+                StartParrying();
+                Debug.Log("패링 일반");
+            }
+        }*/
 
         // 3. 하나라도 패링 시전 시간보다 이전에 도착하면 리턴
-        if (!parryingSucces) return;
+        //if (!parryingSucces) return;
 
     }
 
@@ -142,29 +158,6 @@ public class Player : MonoBehaviour
     {
         Move();
     }
-
-    private void Update()
-    {
-        //if (!isGuard) curGuardTimer -= Time.deltaTime; // 가드가 아닐 때 타이머 계산
-
-        // 패링 시간 체크
-        /*if (isParrying)
-        {
-            curParryingTimer -= Time.deltaTime; // 패링 지속 타이머 실행
-
-            if(curParryingTimer < 0) // 패링 비활성화
-            {
-                isParrying = false;
-                parryingSucces = false;
-                parryingBoxTrigger.SetActive(false);
-                OnParryingEnd?.Invoke(this, EventArgs.Empty);
-            }
-        }*/
-    }
-
-
-    
-
 
 
     // ───────── 이동 처리(회전 포함) ─────────
@@ -236,12 +229,11 @@ public class Player : MonoBehaviour
         }
     }
 
-
-
     // 패링 실패
     public void FailParrying()
     {
         parryingSucces = false;
+        NonEmptyParrying(); // 근처에 패링 객체가 존재함을 의미
     }
 
     // 패링 시도 중 객체가 들어옴
@@ -295,6 +287,81 @@ public class Player : MonoBehaviour
     }*/
 
     //public bool GetParryingComplete => curParryingTimer >= 0f;
+
+    // 패링에 적용된 적들
+    public void AddEnemy(Rigidbody rigid)
+    {
+        enemys.Add(rigid);
+    }
+
+    public void CheckParring()
+    {
+        // 리스트 목록 점검
+        foreach(var e in enemys)
+        {
+            // 1. 방향 및 거리 계산
+            Vector3 dir = transform.position - e.position; // 방향 추출
+            float distance = dir.magnitude - 1; // 보정 거리 (1은 스케일 값만큼 뺀것)
+
+            // 2. 피격 범위까지 들어온 경우 실패
+            if (parryingFailDistance >= distance)
+            {
+                FailParrying(); // 패링 실패
+                NonEmptyParrying(); // 근처에 적이 존재 
+                return;
+            }
+
+            // 3. 후면인지 확인
+            Vector3 toRocket = (e.position - transform.position).normalized;
+            float dot = Vector3.Dot(transform.forward, toRocket);
+
+            // 4. 패링 판정 이내에 들어온 경우
+            if (parryingRange >= distance)
+            {
+                if (dot < 0)
+                {
+                    FailParrying(); // 실패
+                }
+                return;
+            }
+
+            // 5. 범위 밖 패링 물체 계산
+            // 5-1. 속도 계산
+            float currentSpeed = rb.linearVelocity.magnitude; // 속도
+            if (currentSpeed <= 0.01f) currentSpeed = 0.01f; // 속력이 스피드보다 작다면 거의 멈춘급으로 계산
+
+            // 5-2. 도달 예상 시간
+            float timer = distance / currentSpeed;
+            Debug.Log(rb.gameObject.name + " 의 도달 예상 시간 : " + timer);
+
+            // 5-3. 판단
+            // 애니메이션 실행보다 더 빨리 도착한다면 맞는 판정 (안그러면 실행 중에 패링이 될테니)
+            if (parryingAnimationTimer > timer)
+            {
+                FailParrying();
+                return;
+            }
+
+            // 5-4. 애니메이션 실행중에 도달 못한다고 판단했을 때
+            // 애니메이션을 제외한 남은 거리를 계산
+            float reachableDistance = distance - currentSpeed * parryingAnimationTimer;
+            Debug.Log(gameObject.name + " 의 도달 남은 거리 : " + reachableDistance);
+            // 5-4-1. 패링에 성공 경우
+            if (reachableDistance < parryingRange)
+            {
+                if (dot < 0)
+                {
+                    FailParrying(); // 실패
+                }
+            }
+            
+            // 5-4-2. 아예 안맞는 경우 (헛스윙)
+            //else 
+           // {
+                //StartParrying(); // 헛방
+            //}
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
