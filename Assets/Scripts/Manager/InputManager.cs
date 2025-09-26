@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,10 +14,14 @@ public class InputManager : MonoBehaviour
     public event EventHandler OffRun;
     public event EventHandler OnJump;
     public event EventHandler OnParrying; // 패링입력
+    public event EventHandler OnLockOn;
+    public event EventHandler OnLockOff;
 
     public PlayerInput playerInput {  get; private set; }
     public bool connectGamePad { get; private set; } = false;
-
+    private Gamepad gamepad;
+    private Coroutine motorCoroutine;
+   
     public float cameraSensitivity = 1f;
 
     private void Awake()
@@ -35,7 +40,20 @@ public class InputManager : MonoBehaviour
 
         playerInput.Player.Jump.performed += Jump_performed;
 
+        playerInput.Player.LockOn.started += LockOn_started;
+        playerInput.Player.LockOn.canceled += LockOn_canceled;
+
         playerInput.Player.Parrying.performed += Parrying_performed;
+    }
+
+    private void LockOn_canceled(InputAction.CallbackContext obj)
+    {
+        OnLockOff?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void LockOn_started(InputAction.CallbackContext obj)
+    {
+        OnLockOn?.Invoke(this, EventArgs.Empty);
     }
 
     private void Jump_performed(InputAction.CallbackContext obj)
@@ -75,6 +93,7 @@ public class InputManager : MonoBehaviour
         {
             if (device is Gamepad)
             {
+                gamepad = device as Gamepad;
                 connectGamePad = true;
                 ChangeDeviceState(true);
                 break;
@@ -89,6 +108,8 @@ public class InputManager : MonoBehaviour
 
     private void OnDisable()
     {
+        if(gamepad != null) gamepad.SetMotorSpeeds(0, 0);
+
         InputSystem.onDeviceChange -= OnDeviceChange;
     }
 
@@ -115,11 +136,13 @@ public class InputManager : MonoBehaviour
             {
                 case InputDeviceChange.Added:
                     connectGamePad = true;
+                    gamepad = device as Gamepad;
                     ChangeDeviceState(true);
                     cameraSensitivity = 0.7f;
                     break;
                 case InputDeviceChange.Removed:
                     connectGamePad = false;
+                    gamepad = null;
                     ChangeDeviceState(false);
                     cameraSensitivity = 1f;
                     break;
@@ -147,6 +170,45 @@ public class InputManager : MonoBehaviour
     public Vector2 MousePointerDirNormalized()
     {
         return playerInput.Player.Look.ReadValue<Vector2>().normalized;
+    }
+
+    // 진동 울리기
+    public void OnMotor()
+    {
+        if (!connectGamePad) return; // 컨트롤러 아니면 반환
+
+        if(motorCoroutine != null) StopCoroutine(motorCoroutine);
+        motorCoroutine = StartCoroutine(MotorCoroutine());
+    }
+
+    private IEnumerator MotorCoroutine()
+    {
+        //gamepad.SetMotorSpeeds(0.8f, 0.8f);
+        AnimationCurve curve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+        float t = 0f;
+        float d = 0.75f;
+        float lowStart = 0.5f;
+        float lowEnd = 0.1f;
+        float highStart = 1f;
+        float highEnd = 0.4f;
+
+        gamepad.SetMotorSpeeds(lowStart, highStart);
+
+        while (t < d)
+        {
+            t += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(t / d);       // 0→1로 진행률 계산
+            float k = Mathf.Clamp01(curve.Evaluate(u)); // ease 곡선 적용
+            //float low = Mathf.Lerp(lowStart, lowEnd, k);
+            //float high = Mathf.Lerp(highStart, highEnd, k);
+            float low = Mathf.Lerp(lowEnd, lowStart, k);
+            float high = Mathf.Lerp(highEnd, highStart, k);
+            gamepad.SetMotorSpeeds(low, high);
+            yield return null;
+        }
+
+        gamepad.SetMotorSpeeds(0, 0);
     }
 }
 

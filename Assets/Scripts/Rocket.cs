@@ -143,6 +143,7 @@ public class Rocket : MonoBehaviour, IParrying
         {
             if (Player.Instance.parryingSucces) // 판정 성공일때만 진행
             {
+                InputManager.Instance.OnMotor();
                 Player.Instance.StartParrying();
                 ParryingDamage();
             }

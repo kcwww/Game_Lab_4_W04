@@ -56,7 +56,7 @@ public class Player : MonoBehaviour
 
     [Header("Jump")]
     private const float jumpPower = 15f;
-    private bool isGround = false;
+    private bool isGround = true;
 
     private void Awake()
     {
@@ -77,6 +77,18 @@ public class Player : MonoBehaviour
         InputManager.Instance.OnRun += (a, b) => isRun = true;
         InputManager.Instance.OffRun += (a, b) => isRun = false;
         InputManager.Instance.OnJump += InputManager_OnJump;
+        InputManager.Instance.OnLockOn += InputManger_OnLockOn;
+        InputManager.Instance.OnLockOff += InputManger_OnLockOff;
+    }
+
+    private void InputManger_OnLockOff(object sender, EventArgs e)
+    {
+        Debug.Log("락온 종료");
+    }
+
+    private void InputManger_OnLockOn(object sender, EventArgs e)
+    {
+        Debug.Log("락온");
     }
 
     private void InputManager_OnJump(object sender, EventArgs e)
