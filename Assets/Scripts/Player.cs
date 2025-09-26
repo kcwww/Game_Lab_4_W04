@@ -39,10 +39,12 @@ public class Player : MonoBehaviour
     private const float parryingRange = 1f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
     private const float parryingAnimationTimer = 0.2f; // 애니메이션 실행 속도(패링이 지속될 시간 같은 느낌)
     private const float parryingMultiTimer = 0.1f; // 패링의 중복 튕기기 가능한 시간(다중 공격)
+    private const float parryingDelayTimer = 0.5f; // 패링 딜레이 타이머
     private bool isMultiTimer = false; // 다중 공격 패링 활성화 여부
     public bool parryingEmpty { get; private set; } = true; // 패링이 끝날 때까지 도달할 객체가 없는지 판단 변수
     public bool parryingSucces { get; private set; } = false;// 패링의 성공 여부 판단 변수
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
+    public bool parryingDelay { get; private set; } = false; // 패링 딜레이 변수
     private List<Rigidbody> enemys = new List<Rigidbody>();
     public event EventHandler CheckParringDistance; // 패링 객체들의 거리를 판단
     public event EventHandler OnParrying; // 패링이 실행될 때 같이 진행할 이벤트 목록
@@ -74,8 +76,16 @@ public class Player : MonoBehaviour
         InputManager.Instance.OnRun += (a, b) => isRun = true;
         InputManager.Instance.OffRun += (a, b) => isRun = false;
         InputManager.Instance.OnJump += InputManager_OnJump;
-        InputManager.Instance.OnLockOn += InputManger_OnLockOn;
-        InputManager.Instance.OnLockOff += InputManger_OnLockOff;
+        InputManager.Instance.OnLockOnKeyboard += InputManager_OnLockOnKeyboard;
+        //InputManger_OnLockOn;
+        InputManager.Instance.OnLockOnPad += InputManger_OnLockOn;
+        InputManager.Instance.OnLockOffPad += InputManger_OnLockOff;
+    }
+
+    private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)
+    {
+        if (lockOnOrchestrator.isLockOn) lockOnOrchestrator.OnLockOnReleased();
+        else lockOnOrchestrator.OnLockOnPressed();
     }
 
     private void InputManger_OnLockOff(object sender, EventArgs e)
@@ -100,6 +110,10 @@ public class Player : MonoBehaviour
     {     
         // 1. 패링 기본 조건 파악(가드 여부)
         if (!isGuard) return; // 가드중이 아니라면 return
+        if (parryingDelay) return; // 패링 쿨이 안지났다면 return
+
+
+        StartCoroutine(ParryingDelay());
 
         enemys.Clear(); // 적 리스트 초기화
 
@@ -136,6 +150,13 @@ public class Player : MonoBehaviour
         // 3. 하나라도 패링 시전 시간보다 이전에 도착하면 리턴
         //if (!parryingSucces) return;
 
+    }
+
+    private IEnumerator ParryingDelay()
+    {
+        parryingDelay = true;
+        yield return new WaitForSeconds(parryingDelayTimer);
+        parryingDelay = false;
     }
 
     private void InputManager_OffGuard(object sender, System.EventArgs e)
@@ -258,7 +279,7 @@ public class Player : MonoBehaviour
         OnParrying?.Invoke(this, EventArgs.Empty);
 
         anim.SetBool(GuardAnim, false);
-        isGuard = false;
+        //isGuard = false;
         anim.SetTrigger(ParryingAnim);
 
         StartCoroutine(ParryingAnimation());
@@ -278,6 +299,8 @@ public class Player : MonoBehaviour
         isParrying = false;
         parryingSucces = false;
         OnParryingEnd?.Invoke(this, EventArgs.Empty);
+
+        if(isGuard) anim.SetBool(GuardAnim, true);
     }
 
     /*// 패링 애니메이션 실행

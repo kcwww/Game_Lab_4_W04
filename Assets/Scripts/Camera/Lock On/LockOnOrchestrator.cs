@@ -39,6 +39,8 @@ public class LockOnOrchestrator : MonoBehaviour
     float _visualTimer;      // 시각 유예 타이머
     bool _prevRequireOnScreen;
 
+    public bool isLockOn { get; private set; } = false; // 현재 락온 상태인지 파악하는 변수
+
     void Start()
     {
         if (tpsCam) tpsCam.Priority = priorityTPSActive;
@@ -117,6 +119,7 @@ public class LockOnOrchestrator : MonoBehaviour
             SwitchCameraToTPS();
 
             _lockOnMode = false;
+            isLockOn = false;
             _lostTimer = 0f;
             _visualTimer = 0f;
             _didVisualFallback = false;
@@ -138,6 +141,7 @@ public class LockOnOrchestrator : MonoBehaviour
         SwitchCameraToLockOn();
 
         _lockOnMode = true;
+        isLockOn = true;
         _lostTimer = 0f;
         _visualTimer = 0f;
         _didVisualFallback = false;
@@ -158,6 +162,7 @@ public class LockOnOrchestrator : MonoBehaviour
         if (cameraDirectionFix) cameraDirectionFix.OnLockOffDirection();
 
         _lockOnMode = false;
+        isLockOn = false;
         _lostTimer = 0f;
         _visualTimer = 0f;
         _didVisualFallback = false;
