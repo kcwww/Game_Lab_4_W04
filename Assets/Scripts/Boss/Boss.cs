@@ -33,6 +33,12 @@ public class Boss : MonoBehaviour//, IParrying
     private float speed = 5f;
     private float rotationSpeed = 5f;
 
+    [Header("Particle")]
+    [SerializeField] private GameObject slashParticle;
+    [SerializeField] private GameObject xParticle;
+    private const float slashTimer = 0.5f;
+
+
     private void Awake()
     {
         if(Instance == null) Instance = this;
@@ -168,8 +174,15 @@ public class Boss : MonoBehaviour//, IParrying
             yield return new WaitForFixedUpdate();
         }
 
+        slashParticle.SetActive(true);
+        if(!isParryingDamage) xParticle.SetActive(true);
 
+        //IngameManager.Instance.OnslashParticle(transform);
         if (!isParryingDamage) rb.MovePosition(endPos); // 패링을 실패했을 때 마지막 위치 보정
+
+        yield return new WaitForSeconds(slashTimer);
+        slashParticle.SetActive(false);
+        xParticle.SetActive(false);
 
         // 4. 대시 끝
         isAttack = false;
