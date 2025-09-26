@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unscaledTime: 1
   useCurvePulse: 1
-  totalDuration: 2
+  totalDuration: 1
   masterCurve:
     serializedVersion: 2
     m_Curve:
@@ -28,7 +28,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
+      time: 0.7999878
       value: 0
       inSlope: -1.9330217
       outSlope: -1.9330217

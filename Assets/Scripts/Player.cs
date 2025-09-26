@@ -46,6 +46,8 @@ public class Player : MonoBehaviour
     public event EventHandler OnParrying; // 패링이 실행될 때 같이 진행할 이벤트 목록
     public event EventHandler OnParryingEnd; // 패링 끝날 때 같이 끝낼 이벤트 목록
 
+    [Header("Lock On")]
+    public LockOnOrchestrator lockOnOrchestrator;
 
     public class ParryingEventArgs : EventArgs
     {
@@ -83,12 +85,12 @@ public class Player : MonoBehaviour
 
     private void InputManger_OnLockOff(object sender, EventArgs e)
     {
-        Debug.Log("락온 종료");
+        lockOnOrchestrator.OnLockOnReleased();
     }
 
     private void InputManger_OnLockOn(object sender, EventArgs e)
     {
-        Debug.Log("락온");
+        lockOnOrchestrator.OnLockOnPressed();
     }
 
     private void InputManager_OnJump(object sender, EventArgs e)
@@ -161,37 +163,80 @@ public class Player : MonoBehaviour
     }
 
 
-    // 움직임 처리(회전도 포함)
+    
+
+
+
+    // ───────── 이동 처리(회전 포함) ─────────
+    // 필요 시 함께 추가
+    bool IsLockedOn(out Transform target)
+    {
+        target = null;
+        if (lockOnOrchestrator == null || lockOnOrchestrator.selector == null) return false;
+        if (!lockOnOrchestrator.selector.lockOnActive) return false;
+        target = lockOnOrchestrator.selector.CurrentTarget;
+        return target != null;
+    }
+
+    static Vector3 FlatNormalize(Vector3 v, Vector3 up)
+    {
+        v = Vector3.ProjectOnPlane(v, up);
+        float m = v.magnitude;
+        return (m > 1e-4f) ? (v / m) : Vector3.zero;
+    }
+
+    // ===== 교체할 Move() =====
     public void Move()
     {
         if (Time.timeScale != 1) return;
 
         Vector2 dir = InputManager.Instance.MoveDirNormalized();
-        Vector3 inputDir;
-
         if (dir == Vector2.zero)
         {
             anim.SetBool(WalkAnim, false);
             return;
         }
-        else anim.SetBool(WalkAnim, true);
+        anim.SetBool(WalkAnim, true);
 
+        Vector3 up = Vector3.up;
 
-        moveForward = Vector3.ProjectOnPlane(followCamera.transform.forward, Vector3.up).normalized;
-        moveRight = Vector3.ProjectOnPlane(followCamera.transform.right, Vector3.up).normalized;
-        inputDir = moveRight * dir.x + moveForward * dir.y;
+        // 1) 이동축은 항상 카메라 기준
+        Vector3 camFwd = Vector3.ProjectOnPlane(followCamera.transform.forward, up).normalized;
+        Vector3 camRight = Vector3.ProjectOnPlane(followCamera.transform.right, up).normalized;
 
-        float curSpeed = speed;
-        if (isRun) curSpeed += runSpeed;
+        Vector3 inputDir = (camRight * dir.x + camFwd * dir.y);
 
-        rb.MovePosition(rb.position + inputDir.normalized * curSpeed * Time.fixedDeltaTime);
+        // 2) 이동
+        float curSpeed = isRun ? (speed + runSpeed) : speed;
+        Vector3 delta = inputDir.normalized * curSpeed * Time.fixedDeltaTime;
+        rb.MovePosition(rb.position + delta);
 
-        if (inputDir != Vector3.zero)
+        // 3) 회전
+        if (IsLockedOn(out Transform lockTarget))
         {
-            Quaternion rotation = Quaternion.LookRotation(inputDir, Vector3.up);
-            followTarget.localRotation = Quaternion.Slerp(followTarget.localRotation, rotation, rotationSpeed * Time.fixedDeltaTime);
+            // 락온: 항상 타깃을 바라보게(Yaw)
+            Vector3 faceDir = FlatNormalize(lockTarget.position - transform.position, up);
+            if (faceDir != Vector3.zero)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(faceDir, up);
+                followTarget.localRotation = Quaternion.Slerp(
+                    followTarget.localRotation, targetRot, rotationSpeed * Time.fixedDeltaTime);
+            }
+        }
+        else
+        {
+            // 비락온: 이동 방향을 바라보게
+            Vector3 faceDir = FlatNormalize(inputDir, up);
+            if (faceDir != Vector3.zero)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(faceDir, up);
+                followTarget.localRotation = Quaternion.Slerp(
+                    followTarget.localRotation, targetRot, rotationSpeed * Time.fixedDeltaTime);
+            }
         }
     }
+
+
 
     // 패링 실패
     public void FailParrying()

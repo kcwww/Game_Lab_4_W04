@@ -11,6 +11,8 @@ public class CameraDirectionFix : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private float transitionSpeed = 3f; // (현재 예제에선 미사용)
+    [Tooltip("락온 카메라 사용 중에도 이 스냅-잠금을 유지할지")]
+    [SerializeField] private bool keepWhileLockOn = false;
 
     private CinemachineOrbitalFollow orbitalFollow;
     private CinemachineInputAxisController axisController; // 있으면 입력 잠금에 사용
@@ -40,42 +42,35 @@ public class CameraDirectionFix : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        HandleInput();
-    }
+    // 폴링 제거 — Update() / HandleInput() 삭제
 
     void LateUpdate()
     {
-        // Cinemachine 갱신 이후 최종 덮어쓰기 위해 LateUpdate 사용
+        // Cinemachine 갱신 이후 최종 덮어쓰기
         if (isPressing && orbitalFollow != null)
         {
-            // 수평(yaw)만 고정
             orbitalFollow.HorizontalAxis.Value = lockedYaw;
-
-            // Y 좌표/피치를 유지하고 싶으면 수직축도 캐시로 유지
-            // 필요 없다면 아래 라인은 주석 처리 가능
-            orbitalFollow.VerticalAxis.Value = lockedPitch;
+            orbitalFollow.VerticalAxis.Value = lockedPitch; // 필요 없다면 주석 처리 가능
         }
     }
 
-    void HandleInput()
+    /// <summary>입력 매니저의 'LockOn 눌림' 이벤트에서 호출</summary>
+    public void OnLockOnDirection()
     {
         if (orbitalFollow == null || playerTransform == null) return;
 
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            // 1) 플레이어 바라보는 방향으로 수평축 스냅
-            float targetYaw = GetPlayerYaw();
-            orbitalFollow.HorizontalAxis.Value = targetYaw;
+        // 플레이어 바라보는 방향으로 즉시 스냅(수평만)
+        float targetYaw = GetPlayerYaw();
+        orbitalFollow.HorizontalAxis.Value = targetYaw;
 
-            // 2) 현재 축 값을 캐시하고 잠금 시작
-            BeginLock();
-        }
-        else if (Input.GetKeyUp(KeyCode.Q))
-        {
-            EndLock();
-        }
+        // 잠금 시작(축 값 유지)
+        BeginLock();
+    }
+
+    /// <summary>입력 매니저의 'LockOn 해제' 이벤트에서 호출</summary>
+    public void OnLockOffDirection()
+    {
+        EndLock();
     }
 
     float GetPlayerYaw()
@@ -86,21 +81,27 @@ public class CameraDirectionFix : MonoBehaviour
 
     void BeginLock()
     {
+        // 락온 카메라를 사용할 땐 이 스냅-잠금을 끄고 싶다면 옵션 체크
+        if (!keepWhileLockOn)
+        {
+            // 여기서 별도 상태 플래그를 보고 early-return 할 수도 있음
+        }
+
         isPressing = true;
 
         // 현재 값을 캐시해서 그 값을 유지
         lockedYaw = orbitalFollow.HorizontalAxis.Value;
-        lockedPitch = orbitalFollow.VerticalAxis.Value; // Y/pitch는 그대로
+        lockedPitch = orbitalFollow.VerticalAxis.Value; // Y/pitch 유지(불필요하면 제거)
 
-        // 입력 컨트롤러가 있으면 비활성화 → 사용자 입력으로 축이 바뀌는 것 방지
+        // 사용자 입력 축 무력화(있을 때만)
         if (axisController != null) axisController.enabled = false;
-
-        // OrbitalFollow 자체는 유지 (비활성화하면 타겟 추적/오프셋 갱신까지 멈출 수 있음)
     }
 
     void EndLock()
     {
         isPressing = false;
+
+        // 입력 축 복구
         if (axisController != null) axisController.enabled = true;
     }
 }

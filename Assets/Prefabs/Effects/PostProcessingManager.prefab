@@ -51,7 +51,7 @@ MonoBehaviour:
   chroma: {fileID: 247384735922121635}
   dof: {fileID: 3276258501984368722}
   radial: {fileID: 6540962859153877810}
-  defaultPreset: {fileID: 11400000, guid: 8f1695d6535aa9a4184db8f316b3ccab, type: 2}
+  defaultPreset: {fileID: 11400000, guid: 65de7f3776af90945ab17e0fbc1763b1, type: 2}
   conflictPolicy: 0
   parryVFX: {fileID: 0}
   particleVFX: {fileID: 0}
@@ -73,7 +73,7 @@ MonoBehaviour:
   globalVolume: {fileID: 0}
   focusLerpSpeed: 10
   focusDistanceClamp: {x: 0.1, y: 100}
-  baseFocalLength: 85
+  baseFocalLength: 0
   pulseTargetFocalLength: 300
   pulseUpDuration: 0.5
   pulseDownDuration: 0.5
@@ -172,24 +172,24 @@ MonoBehaviour:
   feather: 0.1
   invertCenterBlur: 1
   useCurvePulse: 1
-  pulseTotalDuration: 0.4
+  pulseTotalDuration: 2
   pulseCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
+      value: 1
+      inSlope: -0.32044607
+      outSlope: -0.32044607
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.5
-      value: 1
-      inSlope: 0
-      outSlope: 0
+      time: 1
+      value: 0
+      inSlope: -1.9330217
+      outSlope: -1.9330217
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -200,7 +200,7 @@ MonoBehaviour:
   autoMirrorCurve: 1
   unscaledTime: 1
   editorPeakStrength: 0.8
-  editorDuration: 0.4
+  editorDuration: 2
 --- !u!114 &3810838810276641443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,7 +216,7 @@ MonoBehaviour:
   globalVolume: {fileID: 0}
   unscaledTime: 1
   useCurvePulse: 1
-  pulseTotalDuration: 0.18
+  pulseTotalDuration: 2
   pulseCurve:
     serializedVersion: 2
     m_Curve:
