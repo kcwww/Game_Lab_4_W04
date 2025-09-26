@@ -14,14 +14,14 @@ GameObject:
   - component: {fileID: 454996073990620001}
   - component: {fileID: 2144276207648113248}
   - component: {fileID: 2027144963419154164}
-  - component: {fileID: 1080650058103590205}
+  - component: {fileID: 372236029174690690}
   m_Layer: 0
   m_Name: Third Person Aim Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8633370443397781239
 Transform:
   m_ObjectHideFlags: 0
@@ -30,13 +30,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8267282390841549035}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1521234, y: -0.00000000423223, z: 0.0000000024979017, w: 0.98836154}
+  m_LocalRotation: {x: 0.15212336, y: 0, z: 0, w: 0.98836154}
   m_LocalPosition: {x: 0, y: 3.607058, z: -20.65717}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 17.5, y: 0, z: 0}
 --- !u!114 &1534372687130095918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51,7 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Priority:
     Enabled: 1
-    m_Value: 1
+    m_Value: 10
   OutputChannel: 1
   StandbyUpdate: 2
   m_StreamingVersion: 20241001
@@ -242,7 +242,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85b0611df0e40e244afb276da62a0e50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1080650058103590205
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &372236029174690690
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -257,3 +260,4 @@ MonoBehaviour:
   cinemachineCamera: {fileID: 1534372687130095918}
   playerTransform: {fileID: 0}
   transitionSpeed: 3
+  keepWhileLockOn: 0

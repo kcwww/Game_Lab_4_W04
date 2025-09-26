@@ -153,7 +153,6 @@ public class LockOnDetector : MonoBehaviour
             
 
             _candidates.Add(t);
-            Debug.Log($"[LockOnDetector] candidate: {t.name}  dist={dist:F1}m");
         }
     }
 

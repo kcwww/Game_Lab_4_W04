@@ -114,6 +114,93 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!1 &589451628037794799
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6053624264720132867}
+  - component: {fileID: 556771554077751116}
+  - component: {fileID: 1099342877706848349}
+  m_Layer: 0
+  m_Name: LockOnDetector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6053624264720132867
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 589451628037794799}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -14.12}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4790892786370786444}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &556771554077751116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 589451628037794799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e627935929363864994eb90341046619, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  origin: {fileID: 1224655622753396919}
+  radius: 30
+  candidateLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  triggerInteraction: 1
+  doOcclusionCheck: 1
+  occluderMask:
+    serializedVersion: 2
+    m_Bits: 1
+  sampleInterval: 0.1
+  nonAllocCapacity: 64
+  requireOnScreen: 0
+  viewCamera: {fileID: 0}
+  viewportMargin: 0.05
+  losOrigin: {fileID: 1224655622753396919}
+  losMaskOverride:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &1099342877706848349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 589451628037794799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ae213d55211a5b45bbc85fd8444f539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detector: {fileID: 556771554077751116}
+  viewCamera: {fileID: 0}
+  wCenter: 0.7
+  wDistance: 0.3
+  stickyBonus: 0.12
+  switchThreshold: 0.05
+  switchCooldown: 0.2
+  detectedColor: {r: 1, g: 1, b: 1, a: 1}
+  lockedColor: {r: 1, g: 0, b: 0, a: 1}
+  lockOnActive: 0
+  lockedTargetOverride: {fileID: 0}
 --- !u!1 &744971004127207908
 GameObject:
   m_ObjectHideFlags: 0
@@ -384,6 +471,7 @@ GameObject:
   - component: {fileID: 4494025991602660429}
   - component: {fileID: 2260297657109171981}
   - component: {fileID: 849249387317151209}
+  - component: {fileID: 325589695038563892}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -408,6 +496,7 @@ Transform:
   - {fileID: 1301162017435470568}
   - {fileID: 2427823022201433749}
   - {fileID: 5452366130523797376}
+  - {fileID: 6053624264720132867}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &4494025991602660429
@@ -472,6 +561,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followCamera: {fileID: 0}
   <followTarget>k__BackingField: {fileID: 1224655622753396919}
+  lockOnOrchestrator: {fileID: 325589695038563892}
+--- !u!114 &325589695038563892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459539942591456591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f70bf72f2b6a0734b9e4f82903c45856, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detector: {fileID: 556771554077751116}
+  selector: {fileID: 1099342877706848349}
+  binder: {fileID: 0}
+  tpsCam: {fileID: 0}
+  lockOnCam: {fileID: 0}
+  cameraDirectionFix: {fileID: 0}
+  priorityTPSActive: 10
+  priorityLockOnIdle: 5
+  priorityLockOnActive: 20
+  lostGraceSeconds: 0.35
+  blendGuardSeconds: 0.4
+  relaxOnScreenDuringBlend: 1
+  quickCameraFallbackOnLoss: 1
+  visualGraceSeconds: 0.08
 --- !u!1 &1515821433480889302
 GameObject:
   m_ObjectHideFlags: 0

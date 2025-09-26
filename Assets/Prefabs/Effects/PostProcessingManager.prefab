@@ -73,7 +73,7 @@ MonoBehaviour:
   globalVolume: {fileID: 0}
   focusLerpSpeed: 10
   focusDistanceClamp: {x: 0.1, y: 100}
-  baseFocalLength: 85
+  baseFocalLength: 0
   pulseTargetFocalLength: 300
   pulseUpDuration: 0.5
   pulseDownDuration: 0.5
