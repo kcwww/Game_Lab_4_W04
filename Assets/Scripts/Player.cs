@@ -28,8 +28,8 @@ public class Player : MonoBehaviour
     private float rotationSpeed = 15;
 
     [Header("Gaurd")]
-    private float curGuardTimer = 0f; // 현재 가드 타이머
-    private const float guardTimer = 0.5f; // 1초의 딜레이
+    //private float curGuardTimer = 0f; // 현재 가드 타이머
+    //private const float guardTimer = 0.5f; // 1초의 딜레이
     public bool isGuard { get; private set; } = false;
 
     [Header("Parrying")]
@@ -107,10 +107,11 @@ public class Player : MonoBehaviour
 
     private void InputManager_OnGuard(object sender, System.EventArgs e)
     {
-        if (curGuardTimer > 0) return; // 가드 쿨타임
+        //if (curGuardTimer > 0) return; // 가드 쿨타임
+        if (isGuard) return;
 
         isGuard = true;
-        curGuardTimer = guardTimer; // 가드 타이머 초기화
+        //curGuardTimer = guardTimer; // 가드 타이머 초기화
         anim.SetBool(GuardAnim, isGuard);
     }
 
@@ -121,7 +122,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (!isGuard) curGuardTimer -= Time.deltaTime; // 가드가 아닐 때 타이머 계산
+        //if (!isGuard) curGuardTimer -= Time.deltaTime; // 가드가 아닐 때 타이머 계산
 
         // 패링 시간 체크
         if (isParrying)
