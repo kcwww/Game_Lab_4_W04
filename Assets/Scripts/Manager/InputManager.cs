@@ -14,8 +14,9 @@ public class InputManager : MonoBehaviour
     public event EventHandler OffRun;
     public event EventHandler OnJump;
     public event EventHandler OnParrying; // 패링입력
-    public event EventHandler OnLockOn;
-    public event EventHandler OnLockOff;
+    public event EventHandler OnLockOnKeyboard;
+    public event EventHandler OnLockOnPad;
+    public event EventHandler OnLockOffPad;
 
     public PlayerInput playerInput {  get; private set; }
     public bool connectGamePad { get; private set; } = false;
@@ -40,20 +41,27 @@ public class InputManager : MonoBehaviour
 
         playerInput.Player.Jump.performed += Jump_performed;
 
-        playerInput.Player.LockOn.started += LockOn_started;
-        playerInput.Player.LockOn.canceled += LockOn_canceled;
+        playerInput.Player.LockOnKeyboard.started += LockOnKeyboard_started;
+        playerInput.Player.LockOnPad.started += LockOnPad_started;
+        playerInput.Player.LockOnPad.canceled += LockOnPad_canceled;
+
 
         playerInput.Player.Parrying.performed += Parrying_performed;
     }
 
-    private void LockOn_canceled(InputAction.CallbackContext obj)
+    private void LockOnPad_canceled(InputAction.CallbackContext obj)
     {
-        OnLockOff?.Invoke(this, EventArgs.Empty);
+        OnLockOffPad?.Invoke(this, EventArgs.Empty);
     }
 
-    private void LockOn_started(InputAction.CallbackContext obj)
+    private void LockOnPad_started(InputAction.CallbackContext obj)
     {
-        OnLockOn?.Invoke(this, EventArgs.Empty);
+        OnLockOnPad?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void LockOnKeyboard_started(InputAction.CallbackContext obj)
+    {
+        OnLockOnKeyboard?.Invoke(this, EventArgs.Empty);
     }
 
     private void Jump_performed(InputAction.CallbackContext obj)
@@ -123,6 +131,12 @@ public class InputManager : MonoBehaviour
         playerInput.Player.Run.canceled -= Run_canceled;
 
         playerInput.Player.Jump.performed -= Jump_performed;
+
+        playerInput.Player.LockOnKeyboard.started -= LockOnKeyboard_started;
+        playerInput.Player.LockOnPad.started -= LockOnPad_started;
+        playerInput.Player.LockOnPad.canceled -= LockOnPad_canceled;
+
+        playerInput.Player.Parrying.performed -= Parrying_performed;
 
         playerInput.Dispose();
     }

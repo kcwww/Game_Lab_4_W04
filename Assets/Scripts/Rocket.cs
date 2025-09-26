@@ -48,9 +48,11 @@ public class Rocket : MonoBehaviour, IParrying
     }
 
     // 패링 거리 체크
-    private void Player_OnParrying(object sender, Player.ParryingEventArgs e)
+    private void Player_OnParrying(object sender, System.EventArgs e)
     {
-        // 1. 현재 거리를 계산(현재 scale 때문에 안닫는 부분을 방지하기 위한 변수)
+        Player.Instance.AddEnemy(rb);
+
+        /*// 1. 현재 거리를 계산(현재 scale 때문에 안닫는 부분을 방지하기 위한 변수)
         Vector3 dir = target.position - rb.position - scaleVector;
         float distance = dir.magnitude;
 
@@ -117,7 +119,7 @@ public class Rocket : MonoBehaviour, IParrying
         else
         {
             Player.Instance.StartParrying(); // 헛방
-        }
+        }*/
     }
 
 
