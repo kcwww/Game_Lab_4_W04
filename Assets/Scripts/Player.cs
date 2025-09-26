@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
 
     [Header("Gaurd")]
     private float curGuardTimer = 0f; // 현재 가드 타이머
-    private const float guardTimer = 1f; // 1초의 딜레이
+    private const float guardTimer = 0.5f; // 1초의 딜레이
     public bool isGuard { get; private set; } = false;
 
     [Header("Parrying")]
