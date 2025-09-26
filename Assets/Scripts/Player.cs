@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ public class Player : MonoBehaviour
     private Animator anim;
     [SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
     [field: SerializeField] public Transform followTarget { get; private set; }
-    [field: SerializeField] public GameObject parryingBoxTrigger { get; private set; } // 패링 박스 콜라이더
+    //[field: SerializeField] public ParryingPivot parryingBoxTrigger { get; private set; } // 패링 박스 콜라이더
 
     [Header("Const")]
     private const string WalkAnim = "isWalk";
@@ -33,14 +34,25 @@ public class Player : MonoBehaviour
     public bool isGuard { get; private set; } = false;
 
     [Header("Parrying")]
-    private const float parryingWaitTimer = 0.35f; // 패링을 시도할 때까지 걸리는 시간 (이 시간보다 빠르게 도착하면 피격)
-    private float curParryingTimer = 0; // 패링 중 반격을 진행할 시간
-    private const float parryingTimer = 0.15f; // 패링 중 반격을 진행할 시간, (스케일이 다 달라서 보정이 들어간 시간이 좋을듯)
-    public bool parryingSucces { get; private set; } = true;// 패링의 성공 여부 판단 변수
+    private const float parryingFailDistance = 0.6f; // 패링 실패 거리
+    private const float parryingRange = 1f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
+    private const float parryingAnimationTimer = 0.2f; // 애니메이션 실행 속도(패링이 지속될 시간 같은 느낌)
+    private const float parryingMultiTimer = 0.1f; // 패링의 중복 튕기기 가능한 시간(다중 공격)
+    private bool isMultiTimer = false; // 다중 공격 패링 활성화 여부
+    public bool parryingEmpty { get; private set; } = true; // 패링이 끝날 때까지 도달할 객체가 없는지 판단 변수
+    public bool parryingSucces { get; private set; } = false;// 패링의 성공 여부 판단 변수
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
-    public event EventHandler<float> CheckParringDistance; // 패링 객체들의 거리를 판단
-    public event EventHandler OnParrying; // 패링 실행 때 실행할 함수
-    public event EventHandler OnParryingEnd; // 패링 끝날 때
+    public event EventHandler<ParryingEventArgs> CheckParringDistance; // 패링 객체들의 거리를 판단
+    public event EventHandler OnParrying; // 패링이 실행될 때 같이 진행할 이벤트 목록
+    public event EventHandler OnParryingEnd; // 패링 끝날 때 같이 끝낼 이벤트 목록
+
+
+    public class ParryingEventArgs : EventArgs
+    {
+        public float parryingFailDistance;
+        public float parryingRange;
+        public float parryingAnimationTimer;
+    }
 
     [Header("Jump")]
     private const float jumpPower = 15f;
@@ -74,29 +86,26 @@ public class Player : MonoBehaviour
         rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
     }
 
+    // 패링 키 입력
     private void InputManager_OnParrying(object sender, System.EventArgs e)
     {     
         // 1. 패링 기본 조건 파악(가드 여부)
         if (!isGuard) return; // 가드중이 아니라면 return
 
-        parryingSucces = true;
+        parryingSucces = true; // 성공 초기화
+        parryingEmpty = true; // 근처 객체 여부 초기화
 
         // 2. 패링 물체 확인
-        CheckParringDistance?.Invoke(this, parryingWaitTimer); // 주변 충돌 객체들의 패링 참고
+        CheckParringDistance?.Invoke(this, new ParryingEventArgs
+        { 
+            parryingFailDistance = parryingFailDistance,
+            parryingRange = parryingRange,
+            parryingAnimationTimer = parryingAnimationTimer,
+        }); // 주변 충돌 객체들의 패링 참고
 
         // 3. 하나라도 패링 시전 시간보다 이전에 도착하면 리턴
-        if (!parryingSucces) return; // 패링을 실패하면 리턴
+        if (!parryingSucces) return;
 
-        // 4. 조건을 만족하면 패링 실행
-        OnParrying?.Invoke(this, EventArgs.Empty);
-
-        isParrying = true; // 패링 활성화
-        curParryingTimer = parryingTimer; // 패링 타이머 초기화
-        parryingBoxTrigger.gameObject.SetActive(true);
-        ParryingAnimation();
-
-        anim.SetBool(GuardAnim, false);
-        isGuard = false;
     }
 
     private void InputManager_OffGuard(object sender, System.EventArgs e)
@@ -125,7 +134,7 @@ public class Player : MonoBehaviour
         //if (!isGuard) curGuardTimer -= Time.deltaTime; // 가드가 아닐 때 타이머 계산
 
         // 패링 시간 체크
-        if (isParrying)
+        /*if (isParrying)
         {
             curParryingTimer -= Time.deltaTime; // 패링 지속 타이머 실행
 
@@ -136,7 +145,7 @@ public class Player : MonoBehaviour
                 parryingBoxTrigger.SetActive(false);
                 OnParryingEnd?.Invoke(this, EventArgs.Empty);
             }
-        }
+        }*/
     }
 
 
@@ -178,10 +187,55 @@ public class Player : MonoBehaviour
         parryingSucces = false;
     }
 
+    // 패링 시도 중 객체가 들어옴
+    public void NonEmptyParrying()
+    {
+        parryingEmpty = false;
+    }
+
+    // 패링 성공 (패링 범위 안에 객체 존재), 객체가 멈춰있으면 치명적인 오류임
+    public void SuccessParrying()
+    {
+        isParrying = true; // 패링 활성화
+        //isMultiTimer = true; // 패링 중복 감지 활성화 (변수를 하나 더 둬서 막아야할듯)
+
+        //StartCoroutine(ParryingAnimation());
+    }
+
+    // 패링을 진행
+    public void StartParrying()
+    {
+        // 1. 패링 구독 함수 진행
+        OnParrying?.Invoke(this, EventArgs.Empty);
+
+        anim.SetBool(GuardAnim, false);
+        isGuard = false;
+        anim.SetTrigger(ParryingAnim);
+
+        StartCoroutine(ParryingAnimation());
+        // 변수를 추가해서 이거 못하게 막아보자
+    }
+
+    private IEnumerator ParryingAnimation()
+    {
+        yield return new WaitForSeconds(parryingAnimationTimer);
+
+        EndParrying();
+    }
+
+    // 패링 종료
+    public void EndParrying()
+    {
+        isParrying = false;
+        parryingSucces = false;
+        OnParryingEnd?.Invoke(this, EventArgs.Empty);
+    }
+
+    /*// 패링 애니메이션 실행
     public void ParryingAnimation()
     {
         anim.SetTrigger(ParryingAnim);
-    }
+    }*/
 
     //public bool GetParryingComplete => curParryingTimer >= 0f;
 

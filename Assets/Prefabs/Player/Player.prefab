@@ -472,7 +472,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followCamera: {fileID: 0}
   <followTarget>k__BackingField: {fileID: 1224655622753396919}
-  <parryingBoxTrigger>k__BackingField: {fileID: 4959341689740031475}
 --- !u!1 &1515821433480889302
 GameObject:
   m_ObjectHideFlags: 0
@@ -1772,7 +1771,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1301162017435470568
 Transform:
   m_ObjectHideFlags: 0
