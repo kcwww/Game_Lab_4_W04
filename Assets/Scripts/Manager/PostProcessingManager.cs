@@ -41,7 +41,6 @@ public class PostProcessingManager : MonoBehaviour
     bool isPulsing;
     readonly Queue<PostFXPreset> presetQueue = new Queue<PostFXPreset>();
     Coroutine currentRoutine;
-    Coroutine timeCoroutine;
 
     public VisualEffect parryVFX; // for editor preview
     public VisualEffect particleVFX;  // for hit effect
@@ -60,6 +59,8 @@ public class PostProcessingManager : MonoBehaviour
     [ContextMenu("Pulse Default Preset")]
     public void PulseDefault()
     {
+        Player.Instance.NonEmptyParrying(); // 패링 성공했다면 이건 적있는거임
+
         parryVFX.transform.position = Player.Instance.followTarget.transform.position;
         //parryVFX.transform.rotation = Player.Instance.followTarget.transform.rotation;
 
@@ -78,35 +79,10 @@ public class PostProcessingManager : MonoBehaviour
         particleVFX.Play();
         parryVFX.Play();
 
-        if (timeCoroutine != null) StopCoroutine(timeCoroutine);
-        timeCoroutine = StartCoroutine(TimeCoroutine());
         // temp
         // 바로 1초동안 돌아오게 코루틴
 
         PlayPreset(defaultPreset);
-    }
-
-    private IEnumerator TimeCoroutine()
-    {
-        Time.timeScale = 0.1f;
-
-        IngameManager.Instance.CounterAttackOn(); // 카운터 온
-        yield return new WaitForSecondsRealtime(0.85f); // 기본 대기 시간
-        IngameManager.Instance.CounterAttackOff(); // 카운터 오프
-
-        float duration = 0.3f; // 0.1초만에 복구하고 싶다면
-        float elapsed = 0f;
-        float start = 0.5f;
-        float end = 1f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime; // timeScale 영향 안 받게
-            Time.timeScale = Mathf.Lerp(start, end, elapsed / duration);
-            yield return null;
-        }
-
-        Time.timeScale = 1f; // 보정
     }
 
 

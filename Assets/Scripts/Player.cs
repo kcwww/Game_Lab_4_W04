@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class Player : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class Player : MonoBehaviour
     private const string WalkAnim = "isWalk";
     private const string GuardAnim = "isGuard";
     private const string ParryingAnim = "isParrying";
+    private const string StingAnim = "isSting";
 
     [Header("Movement Status")]
     public bool isMoveInput { get; private set; } = false; // 입력이 들어간 상태
@@ -36,7 +38,7 @@ public class Player : MonoBehaviour
 
     [Header("Parrying")]
     private const float parryingFailDistance = 0.6f; // 패링 실패 거리
-    private const float parryingRange = 1f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
+    private const float parryingRange = 4.5f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
     private const float parryingAnimationTimer = 0.2f; // 애니메이션 실행 속도(패링이 지속될 시간 같은 느낌)
     private const float parryingMultiTimer = 0.1f; // 패링의 중복 튕기기 가능한 시간(다중 공격)
     private const float parryingDelayTimer = 0.5f; // 패링 딜레이 타이머
@@ -60,7 +62,9 @@ public class Player : MonoBehaviour
     [Header("Hit")]
     [SerializeField] private GameObject hitEffect;
 
-    //[Header("Counter")]
+    [Header("Counter")]
+    public bool isCounter { get; private set; } = false; // 카운터 상태 체크
+    private bool counterDelay = false; // 카운터 진행중 여부
     public event EventHandler OnCounter;
 
     private void Awake()
@@ -90,7 +94,21 @@ public class Player : MonoBehaviour
 
     private void InputManager_OnCounter(object sender, EventArgs e)
     {
+        if (!isCounter || counterDelay) return; // 카운터 활성화가 아니라면 return;
+        counterDelay = true;
+
+        anim.SetTrigger(StingAnim); // 스팅 애니메이션 실행
         
+        IngameManager.Instance.CounterAttackOff(); // UI 끄기
+        IngameManager.Instance.ResetTimer();
+        isCounter = false;
+        StartCoroutine(CounterDelay());
+    }
+
+    private IEnumerator CounterDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        counterDelay = false;
     }
 
     private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)
@@ -123,6 +141,7 @@ public class Player : MonoBehaviour
         if (!isGuard) return; // 가드중이 아니라면 return
         if (parryingDelay) return; // 패링 쿨이 안지났다면 return
         if (isParrying) return; // 패링 이미 성공 시
+        if (counterDelay) return; // 반격중이면 못하게 막기
 
         StartCoroutine(ParryingDelay());
 
@@ -279,7 +298,7 @@ public class Player : MonoBehaviour
         parryingEmpty = false;
     }
 
-    // 패링 성공 (패링 범위 안에 객체 존재), 객체가 멈춰있으면 치명적인 오류임
+    // 패링 성공 (패링 범위 안에 객체 존재)
     public void SuccessParrying()
     {
         isParrying = true; // 패링 활성화
@@ -304,7 +323,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator ParryingAnimation()
     {
-        yield return new WaitForSecondsRealtime(parryingAnimationTimer);
+        yield return new WaitForSeconds(parryingAnimationTimer);   
 
         EndParrying();
     }
@@ -312,11 +331,12 @@ public class Player : MonoBehaviour
     // 패링 종료
     public void EndParrying()
     {
+        if (parryingSucces && !parryingEmpty && !isCounter) isCounter = true; // 패링 완전 성공(패링 성공 + 주변 적 존재(공격을 진행한))
         isParrying = false;
         parryingSucces = false;
         OnParryingEnd?.Invoke(this, EventArgs.Empty);
 
-        if(isGuard) anim.SetBool(GuardAnim, true);
+        if(isGuard && !isCounter) anim.SetBool(GuardAnim, true); // 지금 카운터 활성화 상태가 아닌 경우에ㅇㄴ
     }
 
     /*// 패링 애니메이션 실행
@@ -346,7 +366,6 @@ public class Player : MonoBehaviour
             if (parryingFailDistance >= distance)
             {
                 FailParrying(); // 패링 실패
-                NonEmptyParrying(); // 근처에 적이 존재 
                 return;
             }
 
@@ -366,12 +385,12 @@ public class Player : MonoBehaviour
 
             // 5. 범위 밖 패링 물체 계산
             // 5-1. 속도 계산
-            float currentSpeed = rb.linearVelocity.magnitude; // 속도
+            float currentSpeed = e.linearVelocity.magnitude; // 속도
             if (currentSpeed <= 0.01f) currentSpeed = 0.01f; // 속력이 스피드보다 작다면 거의 멈춘급으로 계산
 
             // 5-2. 도달 예상 시간
             float timer = distance / currentSpeed;
-            Debug.Log(rb.gameObject.name + " 의 도달 예상 시간 : " + timer);
+            Debug.Log(e.gameObject.name + " 의 도달 예상 시간 : " + timer);
 
             // 5-3. 판단
             // 애니메이션 실행보다 더 빨리 도착한다면 맞는 판정 (안그러면 실행 중에 패링이 될테니)
@@ -386,18 +405,34 @@ public class Player : MonoBehaviour
             float reachableDistance = distance - currentSpeed * parryingAnimationTimer;
             Debug.Log(gameObject.name + " 의 도달 남은 거리 : " + reachableDistance);
             // 5-4-1. 패링에 성공 경우
-            if (reachableDistance < parryingRange)
+            if (reachableDistance <= parryingRange)
             {
                 if (dot < 0)
                 {
                     FailParrying(); // 실패
+                    return;
                 }
             }
-            
+            else // 헛방
+            {
+                if (!IngameManager.Instance.isCoward) // 겁쟁이가 아니라면 이건 진짜 패링 적용
+                {
+                    parryingSucces = false;
+                    return;
+                }
+                else // 일단 겁쟁이라도 헛방임
+                {
+                    return;
+                }
+            }
+
+            // 패링 성공이니 주변 적도 활성화
+            NonEmptyParrying(); // 패링 성공이니 적도 존재함을 의미
+
             // 5-4-2. 아예 안맞는 경우 (헛스윙)
             //else 
-           // {
-                //StartParrying(); // 헛방
+            // {
+            //StartParrying(); // 헛방
             //}
         }
     }

@@ -222,6 +222,7 @@ public class Boss : MonoBehaviour//, IParrying
         rb.linearVelocity = Vector3.zero;
 
         PostProcessingManager.Instance.PulseDefault();
+        IngameManager.Instance.SlowTimer();
         isParryingDamage = true;
         isParrying = false;
 

@@ -17,12 +17,16 @@ public class IngameManager : MonoBehaviour
     [SerializeField] private GameObject couterObject;
     [SerializeField] private Image counterImage;
 
+    [Header("GameMode")]
+    public bool isCoward { get; private set; } = true; // 기본 노말 모드
+
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
     public int bossHp { get; private set; }
     private const int maxBossHp = 100;
 
     private Coroutine sliderCoroutine;
+    private Coroutine timeCoroutine;
 
     private void Awake()
     {
@@ -133,5 +137,44 @@ public class IngameManager : MonoBehaviour
         else counterImage.sprite = counterSprites[0];
     }
 
-    public void CounterAttackOff() => couterObject.SetActive(false);
+    public void CounterAttackOff()
+    {
+        couterObject.SetActive(false);
+    }
+    // 슬로우 모션 진행
+    public void SlowTimer()
+    {
+        if (timeCoroutine != null) StopCoroutine(timeCoroutine);
+        timeCoroutine = StartCoroutine(TimeCoroutine());
+    }
+
+    // 슬로우 초기화
+    public void ResetTimer()
+    {
+        if (timeCoroutine != null) StopCoroutine(timeCoroutine);
+        Time.timeScale = 1.0f;
+    }
+
+    private IEnumerator TimeCoroutine()
+    {
+        Time.timeScale = 0.1f;
+
+        CounterAttackOn(); // 카운터 온
+        yield return new WaitForSecondsRealtime(0.85f); // 기본 대기 시간
+        CounterAttackOff(); // 카운터 오프
+
+        float duration = 0.3f; // 0.1초만에 복구하고 싶다면
+        float elapsed = 0f;
+        float start = 0.5f;
+        float end = 1f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime; // timeScale 영향 안 받게
+            Time.timeScale = Mathf.Lerp(start, end, elapsed / duration);
+            yield return null;
+        }
+
+        Time.timeScale = 1f; // 보정
+    }
 }
