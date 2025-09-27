@@ -114,7 +114,7 @@ public class Player : MonoBehaviour
         // 1. 패링 기본 조건 파악(가드 여부)
         if (!isGuard) return; // 가드중이 아니라면 return
         if (parryingDelay) return; // 패링 쿨이 안지났다면 return
-
+        if (isParrying) return; // 패링 이미 성공 시
 
         StartCoroutine(ParryingDelay());
 
@@ -133,12 +133,17 @@ public class Player : MonoBehaviour
         {
             SuccessParrying(); // 활성화
 
-            if(parryingEmpty) // 근처에 없는 경우
+            if (parryingEmpty) // 근처에 없는 경우
             {
                 StartParrying();
             }
+            else StartParrying();
 
             Debug.Log("패링 성공");
+        }
+        else
+        {
+            StartParrying();
         }
         /*else // 실패했는데
         {

@@ -166,7 +166,7 @@ public class Boss : MonoBehaviour//, IParrying
         // 2. 방향 계산
         Vector3 dir = (target.position - transform.position).normalized;
         Vector3 startPos = rb.position;
-        Vector3 endPos = target.position - dir*2; // 2 정도의 거리만큼 뒤에 도착
+        Vector3 endPos = target.position - dir; // 2 정도의 거리만큼 뒤에 도착
 
         // 3. 방향 고정 및 애니메이션 실행
         transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
@@ -186,13 +186,19 @@ public class Boss : MonoBehaviour//, IParrying
             yield return new WaitForFixedUpdate();
         }
 
+        //rb.MovePosition(target.position);
+
+        yield return null; // 한 프레임 대기
+
         slashParticle.SetActive(true);
         hitParticle.SetActive(true);
         hitParticle.transform.position = Player.Instance.transform.position;
         if (!isParryingDamage)
         {
             xParticle.SetActive(true);
-            rb.MovePosition(endPos); // 패링을 실패했을 때 마지막 위치 보정
+            rb.MovePosition(endPos);
+
+            Player.Instance.Damaged(1); // 임의로
         }
         isParrying = false;
         yield return new WaitForSeconds(slashTimer);
@@ -264,7 +270,7 @@ public class Boss : MonoBehaviour//, IParrying
         // 3. 이동 및 회전
         Vector3 playerDir = (target.position - rb.position).normalized;
         Vector3 startPos = rb.position; // 지금 현재 위치
-        Vector3 endPos = target.position - playerDir * 2; // 최종 목적지(플레이어)
+        Vector3 endPos = target.position - playerDir; // 최종 목적지(플레이어)
 
         // 4. 방향 고정 및 애니메이션 실행
         transform.rotation = Quaternion.LookRotation(playerDir, Vector3.up);
@@ -287,7 +293,7 @@ public class Boss : MonoBehaviour//, IParrying
         anim.SetBool(GuardAnim, false); // 기존 애니메이션 해제
         anim.SetTrigger(DashSmashAnim);
         playerDir = (target.position - rb.position).normalized; // 마지막 방향 다시 갱신
-        endPos = target.position - playerDir * 2; // 마지막 위치 다시 갱신
+        endPos = target.position - playerDir; // 마지막 위치 다시 갱신
         transform.rotation = Quaternion.LookRotation(playerDir, Vector3.up);
 
         isParrying = true; // 패링 타격 받기
@@ -302,6 +308,10 @@ public class Boss : MonoBehaviour//, IParrying
             yield return new WaitForFixedUpdate();
         }
 
+        //rb.MovePosition(target.position);
+
+        yield return null; // 한 프레임 대기
+
         slashParticle.SetActive(true);
         hitParticle.SetActive(true);
         hitParticle.transform.position = Player.Instance.transform.position;
@@ -309,6 +319,8 @@ public class Boss : MonoBehaviour//, IParrying
         {
             xParticle.SetActive(true);
             rb.MovePosition(endPos);
+
+            Player.Instance.Damaged(1); // 임의로
         }
 
         isParrying = false;
@@ -353,13 +365,13 @@ public class Boss : MonoBehaviour//, IParrying
             }
         }
 
-        if (other.CompareTag("Player")) // 플레이어와 충돌 했을 때
+        /*if (other.CompareTag("Player")) // 플레이어와 충돌 했을 때
         {
-            if (isParryingDamage || !isParrying) return; // 이미 패링 맞은 상태거나 패링 준비(공격 실행)이 아니라면 리턴
+            //if (isParryingDamage || !isParrying) return; // 이미 패링 맞은 상태거나 패링 준비(공격 실행)이 아니라면 리턴
             
 
-            Player.Instance.Damaged(1); // 임의로
-        }
+            //Player.Instance.Damaged(1); // 임의로
+        }*/
     }
 
     /*private void OnCollisionEnter(Collision collision)
