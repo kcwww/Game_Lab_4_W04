@@ -33,8 +33,6 @@ public class Player : MonoBehaviour
     private float rotationSpeed = 15;
 
     [Header("Gaurd")]
-    //private float curGuardTimer = 0f; // 현재 가드 타이머
-    //private const float guardTimer = 0.5f; // 1초의 딜레이
     public bool isGuard { get; private set; } = false;
 
     [Header("Parrying")]
@@ -48,6 +46,7 @@ public class Player : MonoBehaviour
     public bool parryingSucces { get; private set; } = false;// 패링의 성공 여부 판단 변수
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
     public bool parryingDelay { get; private set; } = false; // 패링 딜레이 변수
+    public bool isSlashParrying { get; private set; } = false; // 참격 패링
     private List<Rigidbody> enemys = new List<Rigidbody>();
     public event EventHandler CheckParringDistance; // 패링 객체들의 거리를 판단
     public event EventHandler OnParrying; // 패링이 실행될 때 같이 진행할 이벤트 목록
@@ -351,6 +350,8 @@ public class Player : MonoBehaviour
         if(isGuard && !isCounter) anim.SetBool(GuardAnim, true); // 지금 카운터 활성화 상태가 아닌 경우에ㅇㄴ
     }
 
+
+    public void SlashParrying() { isParrying = true; }
     /*// 패링 애니메이션 실행
     public void ParryingAnimation()
     {

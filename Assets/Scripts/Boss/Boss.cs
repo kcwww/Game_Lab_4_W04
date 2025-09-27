@@ -47,6 +47,7 @@ public class Boss : MonoBehaviour//, IParrying
     [SerializeField] private GameObject slashParticle;
     [SerializeField] private GameObject hitParticle;
     [SerializeField] private GameObject xParticle;
+    [SerializeField] private GameObject groundSlashParticle;
     private const float slashTimer = 0.5f;
 
 
@@ -139,6 +140,8 @@ public class Boss : MonoBehaviour//, IParrying
                 break;
             case 1:
                 DashAttack();
+                break;
+            case 2:
                 break;
         }
 
@@ -342,6 +345,10 @@ public class Boss : MonoBehaviour//, IParrying
         yield return null;
     }
 
+    private void GroundSlash()
+    {
+
+    }
 
 
     // 대쉬 랜덤 포인트
