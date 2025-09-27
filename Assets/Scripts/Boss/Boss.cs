@@ -70,6 +70,7 @@ public class Boss : MonoBehaviour//, IParrying
     private void Player_EndParrying(object sender, System.EventArgs e)
     {
         isParryingDamage = false;
+        isParrying = false;
     }
 
     private void Player_CheckParringDistance(object sender, System.EventArgs e)
@@ -188,15 +189,18 @@ public class Boss : MonoBehaviour//, IParrying
         slashParticle.SetActive(true);
         hitParticle.SetActive(true);
         hitParticle.transform.position = Player.Instance.transform.position;
-        if (!isParryingDamage) xParticle.SetActive(true);
-
-        //IngameManager.Instance.OnslashParticle(transform);
-        if (!isParryingDamage) rb.MovePosition(endPos); // 패링을 실패했을 때 마지막 위치 보정
-
+        if (!isParryingDamage)
+        {
+            xParticle.SetActive(true);
+            rb.MovePosition(endPos); // 패링을 실패했을 때 마지막 위치 보정
+        }
+        isParrying = false;
         yield return new WaitForSeconds(slashTimer);
         slashParticle.SetActive(false);
         hitParticle.SetActive(false);
         xParticle.SetActive(false);
+
+        //yield return new WaitForSecondsRealtime(0.1f); // 패링 유예기간
 
         // 4. 대시 끝
         isAttack = false;
@@ -213,7 +217,15 @@ public class Boss : MonoBehaviour//, IParrying
 
         PostProcessingManager.Instance.PulseDefault();
         isParryingDamage = true;
+        isParrying = false;
 
+        StartCoroutine(HitMove());
+        //rb.AddForce((rb.position - target.position).normalized * 45, ForceMode.Impulse);
+    }
+
+    private IEnumerator HitMove()
+    {
+        yield return new WaitForSeconds(0.5f); // 피격 모션 대기
         rb.AddForce((rb.position - target.position).normalized * 45, ForceMode.Impulse);
     }
 
@@ -233,7 +245,7 @@ public class Boss : MonoBehaviour//, IParrying
             aiText.text += v;
             yield return new WaitForSeconds(0.15f);
         }
-        
+
         yield return new WaitForSeconds(0.3f);
         aiText.text = "";
 
@@ -290,12 +302,22 @@ public class Boss : MonoBehaviour//, IParrying
             yield return new WaitForFixedUpdate();
         }
 
-        if (!isParryingDamage) rb.MovePosition(endPos); // 패링을 실패했을 때 마지막 위치 보정
+        slashParticle.SetActive(true);
+        hitParticle.SetActive(true);
+        hitParticle.transform.position = Player.Instance.transform.position;
+        if (!isParryingDamage)
+        {
+            xParticle.SetActive(true);
+            rb.MovePosition(endPos);
+        }
 
+        isParrying = false;
         yield return new WaitForSeconds(slashTimer);
         slashParticle.SetActive(false);
         hitParticle.SetActive(false);
         xParticle.SetActive(false);
+
+        //yield return new WaitForSecondsRealtime(0.1f); // 패링 유예기간
 
         // 4. 대시 끝
         isAttack = false;
@@ -320,14 +342,23 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Player"))
+        if(other.CompareTag("Parrying"))
         {
             if (Player.Instance.parryingSucces) // 판정 성공일때만 진행
             {
+                if (isParryingDamage || !isParrying) return; // 이미 맞았거나, 패링 상태가 아니라면
+                ParryingDamage();
                 InputManager.Instance.OnMotor();
                 Player.Instance.StartParrying();
-                ParryingDamage();
             }
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Player")) // 플레이어와 충돌 했을 때
+        {
+            if (isParryingDamage) return; // 이미 패링 맞은 상태라면
         }
     }
 }

@@ -5471,6 +5471,7 @@ MonoBehaviour:
   followCamera: {fileID: 0}
   <followTarget>k__BackingField: {fileID: 1224655622753396919}
   lockOnOrchestrator: {fileID: 325589695038563892}
+  hitEffect: {fileID: 0}
 --- !u!114 &325589695038563892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11736,7 +11737,7 @@ GameObject:
   - component: {fileID: 8530184729038130578}
   m_Layer: 0
   m_Name: ParryingBox
-  m_TagString: Player
+  m_TagString: Parrying
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

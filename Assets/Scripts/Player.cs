@@ -57,6 +57,9 @@ public class Player : MonoBehaviour
     private const float jumpPower = 15f;
     private bool isGround = true;
 
+    [Header("Hit")]
+    [SerializeField] private GameObject hitEffect;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -288,7 +291,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator ParryingAnimation()
     {
-        yield return new WaitForSeconds(parryingAnimationTimer);
+        yield return new WaitForSecondsRealtime(parryingAnimationTimer);
 
         EndParrying();
     }
@@ -384,6 +387,12 @@ public class Player : MonoBehaviour
                 //StartParrying(); // 헛방
             //}
         }
+    }
+
+    // 피격 받음
+    public void Damaged()
+    {
+
     }
 
     private void OnCollisionEnter(Collision collision)
