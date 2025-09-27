@@ -50,6 +50,9 @@ public class Boss : MonoBehaviour//, IParrying
     private const float slashTimer = 0.5f;
 
 
+    [Header("Hit")]
+    private bool isHitDelay = false; // 현재 피격 딜레이중인가
+
     private void Awake()
     {
         if(Instance == null) Instance = this;
@@ -75,6 +78,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Player_CheckParringDistance(object sender, System.EventArgs e)
     {
+        if (isHitDelay) return; // 아직 맞은 상태라면 추가 반격x
         Player.Instance.AddEnemy(rb);
     }
 
@@ -353,17 +357,25 @@ public class Boss : MonoBehaviour//, IParrying
         return dir;
     }
 
+    private IEnumerator HitCoroutine()
+    {
+        isHitDelay = true;
+        yield return new WaitForSeconds(1f);
+        isHitDelay = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if(other.CompareTag("Parrying"))
         {
             if (Player.Instance.parryingSucces) // 판정 성공일때만 진행
             {
-                if (isParryingDamage || !isParrying) return; // 이미 맞았거나, 패링 상태가 아니라면
+                if (isParryingDamage || !isParrying || isHitDelay) return; // 이미 맞았거나, 패링 상태가 아니라면
                 ParryingDamage();
                 InputManager.Instance.OnMotor();
                 Player.Instance.StartParrying();
                 Player.Instance.GetEnemyPos(rb.transform);
+                StartCoroutine(HitCoroutine());
             }
         }
 

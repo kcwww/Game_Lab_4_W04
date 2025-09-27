@@ -62,6 +62,7 @@ public class Player : MonoBehaviour
 
     [Header("Hit")]
     [SerializeField] private GameObject hitEffect;
+    public bool isHit { get; private set; } = false;
 
     [Header("Counter")]
     public bool isCounter = false; // 카운터 상태 체크
@@ -96,8 +97,10 @@ public class Player : MonoBehaviour
 
     private void InputManager_OnCounter(object sender, EventArgs e)
     {
+        if (isHit) return;
         if (!isCounter || counterDelay) return; // 카운터 활성화가 아니라면 return;
         counterDelay = true;
+        isCounter = false;
 
         anim.SetTrigger(StingAnim); // 스팅 애니메이션 실행
         Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
@@ -108,7 +111,6 @@ public class Player : MonoBehaviour
         IngameManager.Instance.DamageBoss(1);
         IngameManager.Instance.CounterAttackOff(); // UI 끄기
         IngameManager.Instance.ResetTimer();
-        isCounter = false;
         StartCoroutine(CounterDelay());
     }
 
@@ -149,6 +151,7 @@ public class Player : MonoBehaviour
         if (parryingDelay) return; // 패링 쿨이 안지났다면 return
         if (isParrying) return; // 패링 이미 성공 시
         if (counterDelay) return; // 반격중이면 못하게 막기
+        if (isHit) return;
 
         StartCoroutine(ParryingDelay());
 
@@ -209,6 +212,7 @@ public class Player : MonoBehaviour
 
     private void InputManager_OnGuard(object sender, System.EventArgs e)
     {
+        if (isHit) return;
         //if (curGuardTimer > 0) return; // 가드 쿨타임
         if (isGuard) return;
 
@@ -471,7 +475,16 @@ public class Player : MonoBehaviour
     
     public void Hit()
     {
+        if (isHit) return;
+        isHit = true;
         anim.SetTrigger(HitAnim);
+        StartCoroutine(HitRoutine());
+    }
+
+    private IEnumerator HitRoutine()
+    {
+        yield return new WaitForSeconds(0.5f);
+        isHit = false;
     }
 
     private void OnCollisionEnter(Collision collision)
