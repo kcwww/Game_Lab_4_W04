@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class Boss : MonoBehaviour//, IParrying
@@ -9,7 +10,8 @@ public class Boss : MonoBehaviour//, IParrying
     private Animator anim;
     private Rigidbody rb;
     private Transform target;
-    [SerializeField] private LayerMask groundMask; 
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private TextMeshProUGUI aiText;
 
     [Header("Const")]
     private const string WalkAnim = "isWalk";
@@ -17,6 +19,8 @@ public class Boss : MonoBehaviour//, IParrying
     private const string SmashAnim = "isSmash";
     private const string GuardAnim = "isGuard";
     private const string DashSmashAnim = "isDashSmash";
+    private const string HorizontalText = "가로베기";
+    private const string VerticalText = "섬광일도";
 
     [Header("Parrying")]
     public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
@@ -52,6 +56,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
+        aiText.text = ""; // 문구 비활성화
     }
 
     private void Start()
@@ -146,8 +151,14 @@ public class Boss : MonoBehaviour//, IParrying
     private IEnumerator SmashCoroutine()
     {
         // 1. 가로 베기 텍스트 및 이펙트 실행
+        foreach(var v in HorizontalText)
+        {
+            aiText.text += v;
+            yield return new WaitForSeconds(0.15f);
+        }
 
         yield return new WaitForSeconds(0.5f);
+        aiText.text = "";
 
         anim.SetBool(HorizontalAnim, false);
 
@@ -216,8 +227,15 @@ public class Boss : MonoBehaviour//, IParrying
     private IEnumerator IRandomDashAttack()
     {
         // 1. 텍스트 출력 및 대기
-
-        yield return new WaitForSeconds(0.5f);
+        // 1. 가로 베기 텍스트 및 이펙트 실행
+        foreach (var v in VerticalText)
+        {
+            aiText.text += v;
+            yield return new WaitForSeconds(0.15f);
+        }
+        
+        yield return new WaitForSeconds(0.3f);
+        aiText.text = "";
 
         // 2. 방향 추출
         Vector3 dir = GetRandomPoint();
@@ -251,7 +269,7 @@ public class Boss : MonoBehaviour//, IParrying
             yield return new WaitForFixedUpdate();
         }
 
-        yield return new WaitForSeconds(0.35f); // 이동 후 잠시 대기
+        yield return new WaitForSeconds(0.55f); // 이동 후 잠시 대기
 
         // 5. 플레이어로 이동
         anim.SetBool(GuardAnim, false); // 기존 애니메이션 해제

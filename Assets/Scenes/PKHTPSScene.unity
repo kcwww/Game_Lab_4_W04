@@ -20184,10 +20184,6 @@ PrefabInstance:
       propertyPath: hitParticle
       value: 
       objectReference: {fileID: 574832234}
-    - target: {fileID: 1008362310547171356, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
-      propertyPath: groundMask.m_Bits
-      value: 256
-      objectReference: {fileID: 0}
     - target: {fileID: 4534312552231550247, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -20227,6 +20223,22 @@ PrefabInstance:
     - target: {fileID: 4534312552231550247, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6189212601359305365, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6189212601359305365, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6189212601359305365, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6189212601359305365, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4278190080
       objectReference: {fileID: 0}
     - target: {fileID: 6235559748465300777, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
       propertyPath: m_Name
