@@ -232,7 +232,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private IEnumerator HitMove()
     {
-        yield return new WaitForSeconds(0.5f); // 피격 모션 대기
+        yield return new WaitForSeconds(0.25f); // 피격 모션 대기
         rb.AddForce((rb.position - target.position).normalized * 45, ForceMode.Impulse);
     }
 
@@ -363,6 +363,7 @@ public class Boss : MonoBehaviour//, IParrying
                 ParryingDamage();
                 InputManager.Instance.OnMotor();
                 Player.Instance.StartParrying();
+                Player.Instance.GetEnemyPos(rb.transform);
             }
         }
 

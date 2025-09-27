@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.ParticleSystem;
 
 public class IngameManager : MonoBehaviour
 {
@@ -20,13 +21,17 @@ public class IngameManager : MonoBehaviour
     [Header("GameMode")]
     public bool isCoward { get; private set; } = true; // 기본 노말 모드
 
+    [Header("Effect")]
+    [SerializeField] private GameObject hitParticle;
+
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
     public int bossHp { get; private set; }
-    private const int maxBossHp = 100;
+    private const int maxBossHp = 15;
 
     private Coroutine sliderCoroutine;
     private Coroutine timeCoroutine;
+    private Coroutine bossHitCoroutine;
 
     private void Awake()
     {
@@ -89,6 +94,33 @@ public class IngameManager : MonoBehaviour
 
         if(sliderCoroutine != null) StopCoroutine(sliderCoroutine);
         sliderCoroutine = StartCoroutine(LerpDamage(true));
+
+        Player.Instance.Hit();
+    }
+
+    public void DamageBoss(int value)
+    {
+        bossHp -= value;
+
+        if (bossHp < 0)
+        {
+            Debug.Log("게임 클리어");
+        }
+
+        if (sliderCoroutine != null) StopCoroutine(sliderCoroutine);
+        sliderCoroutine = StartCoroutine(LerpDamage(false));
+
+        if (bossHitCoroutine != null) StopCoroutine(bossHitCoroutine);
+        bossHitCoroutine = StartCoroutine(BossHit());
+    }
+
+    public IEnumerator BossHit()
+    {
+        hitParticle.SetActive(true);
+        hitParticle.transform.position = Boss.Instance.transform.position;
+
+        yield return new WaitForSeconds(0.5f);
+        hitParticle.SetActive(false);
     }
 
     // 플레이어인지 AI인지 구분
@@ -139,6 +171,8 @@ public class IngameManager : MonoBehaviour
 
     public void CounterAttackOff()
     {
+        Player.Instance.isCounter = false; // 비활성화
+        Player.Instance.counterDelay = false;
         couterObject.SetActive(false);
     }
     // 슬로우 모션 진행
@@ -160,7 +194,7 @@ public class IngameManager : MonoBehaviour
         Time.timeScale = 0.1f;
 
         CounterAttackOn(); // 카운터 온
-        yield return new WaitForSecondsRealtime(0.85f); // 기본 대기 시간
+        yield return new WaitForSecondsRealtime(1.5f); // 기본 대기 시간
         CounterAttackOff(); // 카운터 오프
 
         float duration = 0.3f; // 0.1초만에 복구하고 싶다면

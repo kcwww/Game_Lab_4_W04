@@ -21,6 +21,7 @@ public class Player : MonoBehaviour
     private const string GuardAnim = "isGuard";
     private const string ParryingAnim = "isParrying";
     private const string StingAnim = "isSting";
+    private const string HitAnim = "isHit";
 
     [Header("Movement Status")]
     public bool isMoveInput { get; private set; } = false; // 입력이 들어간 상태
@@ -63,9 +64,10 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject hitEffect;
 
     [Header("Counter")]
-    public bool isCounter { get; private set; } = false; // 카운터 상태 체크
-    private bool counterDelay = false; // 카운터 진행중 여부
+    public bool isCounter = false; // 카운터 상태 체크
+    public bool counterDelay = false; // 카운터 진행중 여부
     public event EventHandler OnCounter;
+    private Transform enemyPos;
 
     private void Awake()
     {
@@ -98,7 +100,12 @@ public class Player : MonoBehaviour
         counterDelay = true;
 
         anim.SetTrigger(StingAnim); // 스팅 애니메이션 실행
-        
+        Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
+        dir.Normalize();
+
+        rb.AddForce(dir * 90f, ForceMode.Impulse);
+
+        IngameManager.Instance.DamageBoss(1);
         IngameManager.Instance.CounterAttackOff(); // UI 끄기
         IngameManager.Instance.ResetTimer();
         isCounter = false;
@@ -212,6 +219,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (counterDelay) return;
         Move();
     }
 
@@ -323,7 +331,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator ParryingAnimation()
     {
-        yield return new WaitForSeconds(parryingAnimationTimer);   
+        yield return new WaitForSecondsRealtime(parryingAnimationTimer + 0.3f);   
 
         EndParrying();
     }
@@ -362,8 +370,10 @@ public class Player : MonoBehaviour
             Vector3 dir = transform.position - e.position; // 방향 추출
             float distance = dir.magnitude - 1; // 보정 거리 (1은 스케일 값만큼 뺀것)
 
+            float failDistacne = IngameManager.Instance.isCoward ? parryingFailDistance / 2 : parryingFailDistance;
+
             // 2. 피격 범위까지 들어온 경우 실패
-            if (parryingFailDistance >= distance)
+            if (failDistacne >= distance)
             {
                 FailParrying(); // 패링 실패
                 return;
@@ -454,6 +464,15 @@ public class Player : MonoBehaviour
         hitEffect.gameObject.SetActive(false);
     }
 
+    public void GetEnemyPos(Transform pos)
+    {
+        enemyPos = pos;
+    }
+    
+    public void Hit()
+    {
+        anim.SetTrigger(HitAnim);
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
