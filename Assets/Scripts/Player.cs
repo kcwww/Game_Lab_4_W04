@@ -57,6 +57,9 @@ public class Player : MonoBehaviour
     private const float jumpPower = 15f;
     private bool isGround = true;
 
+    [Header("Hit")]
+    [SerializeField] private GameObject hitEffect;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -288,7 +291,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator ParryingAnimation()
     {
-        yield return new WaitForSeconds(parryingAnimationTimer);
+        yield return new WaitForSecondsRealtime(parryingAnimationTimer);
 
         EndParrying();
     }
@@ -385,6 +388,24 @@ public class Player : MonoBehaviour
             //}
         }
     }
+
+    // 피격 받음
+    public void Damaged(int value)
+    {
+        IngameManager.Instance.DamagePlayer(value);
+        hitEffect.transform.position = transform.position;
+        hitEffect.transform.rotation = transform.rotation;
+        hitEffect.gameObject.SetActive(true);
+
+        StartCoroutine(OffEffect());
+    }
+
+    private IEnumerator OffEffect()
+    {
+        yield return new WaitForSeconds(0.5f);
+        hitEffect.gameObject.SetActive(false);
+    }
+
 
     private void OnCollisionEnter(Collision collision)
     {

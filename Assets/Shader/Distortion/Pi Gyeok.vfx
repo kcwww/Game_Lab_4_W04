@@ -1299,7 +1299,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.AnimationCurve, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"frames":[{"time":0.03333155810832977,"value":0.4037986993789673,"inTangent":0.5028961300849915,"outTangent":0.5028961300849915,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.9412312507629395,"value":0.0035708248615264894,"inTangent":-0.3528132438659668,"outTangent":-0.3528132438659668,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false}],"preWrapMode":8,"postWrapMode":8,"version":1}'
+      m_SerializableObject: '{"frames":[{"time":-0.004423592239618301,"value":0.25187796354293826,"inTangent":0.5203335881233215,"outTangent":0.5203335881233215,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.711754322052002,"value":0.0027468502521514894,"inTangent":-0.3528132438659668,"outTangent":-0.3528132438659668,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false}],"preWrapMode":8,"postWrapMode":8,"version":1}'
     m_Space: -1
   m_Property:
     name: curve
@@ -2712,7 +2712,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 30
+      m_SerializableObject: 10
     m_Space: -1
   m_Property:
     name: _AlphaScale
