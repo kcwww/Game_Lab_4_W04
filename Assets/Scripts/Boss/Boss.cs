@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class Boss : MonoBehaviour//, IParrying
 {
@@ -10,11 +9,14 @@ public class Boss : MonoBehaviour//, IParrying
     private Animator anim;
     private Rigidbody rb;
     private Transform target;
+    [SerializeField] private LayerMask groundMask; 
 
     [Header("Const")]
     private const string WalkAnim = "isWalk";
     private const string HorizontalAnim = "isHorizontal";
     private const string SmashAnim = "isSmash";
+    private const string GuardAnim = "isGuard";
+    private const string DashSmashAnim = "isDashSmash";
 
     [Header("Parrying")]
     public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
@@ -28,6 +30,10 @@ public class Boss : MonoBehaviour//, IParrying
 
     private float horizontalSpeed = 15f; // 가로베기 이동 속도
     private bool isHorizontal = false; // 발도 체크
+    private const float radiusRange = 2f; // 대시 범위 증감량
+    private const float dashRadius = 5f; // 대시 기본 범위
+    private float radius = 5f; // 기본 반지름 값
+    private int patterCount = 2;
 
     [Header("Status")]
     private float speed = 5f;
@@ -114,9 +120,17 @@ public class Boss : MonoBehaviour//, IParrying
         if (curAttackTimer > 0) return;
         isAttack = true; // 공격 진행
 
+        int ran = Random.Range(0, patterCount);
 
-        // 나중에 공격 패턴 만들어서 더 넣기
-        HorizontalSmash();
+        switch (ran)
+        {
+            case 0:
+                HorizontalSmash();
+                break;
+            case 1:
+                DashAttack();
+                break;
+        }
 
         curAttackTimer = attackTimer;
     }
@@ -131,39 +145,24 @@ public class Boss : MonoBehaviour//, IParrying
 
     private IEnumerator SmashCoroutine()
     {
-        // 1. 발도 대기
-        yield return new WaitForSeconds(0.3f);
-
-        // 2. 가로 베기 텍스트 및 이펙트 실행
+        // 1. 가로 베기 텍스트 및 이펙트 실행
 
         yield return new WaitForSeconds(0.5f);
 
         anim.SetBool(HorizontalAnim, false);
 
-        // 3. 방향 계산
+        // 2. 방향 계산
         Vector3 dir = (target.position - transform.position).normalized;
         Vector3 startPos = rb.position;
         Vector3 endPos = target.position - dir*2; // 2 정도의 거리만큼 뒤에 도착
 
-        // 4. 방향 고정 및 애니메이션 실행
+        // 3. 방향 고정 및 애니메이션 실행
         transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
         anim.SetTrigger(SmashAnim);
 
         isParrying = true; // 패링 타격 받기
         float dashDuration = 0.3f; // 대시 시간
         float elapsed = 0f;
-
-        /*while (elapsed < dashDuration || isParryingDamage)
-        {
-            elapsed += Time.fixedDeltaTime;
-            float t = elapsed / dashDuration;
-            Vector3 newPos = Vector3.Lerp(startPos, endPos, t);
-            rb.MovePosition(newPos);
-
-            yield return new WaitForFixedUpdate();
-        }*/
-
-        //rb.linearVelocity = dir * horizontalSpeed;
 
         while (elapsed < dashDuration && !isParryingDamage)
         {
@@ -205,6 +204,100 @@ public class Boss : MonoBehaviour//, IParrying
         isParryingDamage = true;
 
         rb.AddForce((rb.position - target.position).normalized * 45, ForceMode.Impulse);
+    }
+
+    public void DashAttack()
+    {
+        anim.SetBool(GuardAnim, true); // 발도 준비
+
+        StartCoroutine(IRandomDashAttack());
+    }
+
+    private IEnumerator IRandomDashAttack()
+    {
+        // 1. 텍스트 출력 및 대기
+
+        yield return new WaitForSeconds(0.5f);
+
+        // 2. 방향 추출
+        Vector3 dir = GetRandomPoint();
+        bool isGround = false;
+
+        while (!isGround)
+        {
+            if (Physics.Raycast(dir + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 50f, groundMask))
+            {
+                isGround = true;
+            }
+        }
+
+        // 3. 이동 및 회전
+        Vector3 playerDir = (target.position - rb.position).normalized;
+        Vector3 startPos = rb.position; // 지금 현재 위치
+        Vector3 endPos = target.position - playerDir * 2; // 최종 목적지(플레이어)
+
+        // 4. 방향 고정 및 애니메이션 실행
+        transform.rotation = Quaternion.LookRotation(playerDir, Vector3.up);
+
+        float dashDuration = 0.1f; // 대시 시간
+        float elapsed = 0f;
+
+        while (elapsed < dashDuration)
+        {
+            elapsed += Time.fixedDeltaTime;
+
+            float t = elapsed / dashDuration;
+            rb.MovePosition(Vector3.Lerp(startPos, dir, t));
+            yield return new WaitForFixedUpdate();
+        }
+
+        yield return new WaitForSeconds(0.35f); // 이동 후 잠시 대기
+
+        // 5. 플레이어로 이동
+        anim.SetBool(GuardAnim, false); // 기존 애니메이션 해제
+        anim.SetTrigger(DashSmashAnim);
+        playerDir = (target.position - rb.position).normalized; // 마지막 방향 다시 갱신
+        endPos = target.position - playerDir * 2; // 마지막 위치 다시 갱신
+        transform.rotation = Quaternion.LookRotation(playerDir, Vector3.up);
+
+        isParrying = true; // 패링 타격 받기
+        dashDuration = 0.3f;
+        elapsed = 0f;
+        while (elapsed < dashDuration && !isParryingDamage)
+        {
+            elapsed += Time.fixedDeltaTime;
+
+            float t = elapsed / dashDuration;
+            rb.MovePosition(Vector3.Lerp(dir, endPos, t));
+            yield return new WaitForFixedUpdate();
+        }
+
+        if (!isParryingDamage) rb.MovePosition(endPos); // 패링을 실패했을 때 마지막 위치 보정
+
+        yield return new WaitForSeconds(slashTimer);
+        slashParticle.SetActive(false);
+        hitParticle.SetActive(false);
+        xParticle.SetActive(false);
+
+        // 4. 대시 끝
+        isAttack = false;
+
+        yield return null;
+    }
+
+
+
+    // 대쉬 랜덤 포인트
+    private Vector3 GetRandomPoint()
+    {
+        float angle = Random.Range(0f, 360f);
+
+        radius = dashRadius + Random.Range(-radiusRange, radiusRange); // 대쉬 범위 랜덤화
+
+        // 각도로 좌표 구하기
+        Vector3 dir = new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+
+        return dir;
     }
 
     private void OnTriggerEnter(Collider other)

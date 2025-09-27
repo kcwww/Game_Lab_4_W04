@@ -20184,6 +20184,10 @@ PrefabInstance:
       propertyPath: hitParticle
       value: 
       objectReference: {fileID: 574832234}
+    - target: {fileID: 1008362310547171356, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: groundMask.m_Bits
+      value: 256
+      objectReference: {fileID: 0}
     - target: {fileID: 4534312552231550247, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -35487,7 +35491,7 @@ GameObject:
   - component: {fileID: 1178868034}
   - component: {fileID: 1178868033}
   - component: {fileID: 1178868032}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane (1)
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -35579,7 +35583,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.000050295803, y: 0.0006126616, z: 0.0012367376, w: 0.99999905}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_LocalScale: {x: 8, y: 8, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
