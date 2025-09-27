@@ -390,10 +390,22 @@ public class Player : MonoBehaviour
     }
 
     // 피격 받음
-    public void Damaged()
+    public void Damaged(int value)
     {
+        IngameManager.Instance.DamagePlayer(value);
+        hitEffect.transform.position = transform.position;
+        hitEffect.transform.rotation = transform.rotation;
+        hitEffect.gameObject.SetActive(true);
 
+        StartCoroutine(OffEffect());
     }
+
+    private IEnumerator OffEffect()
+    {
+        yield return new WaitForSeconds(0.5f);
+        hitEffect.gameObject.SetActive(false);
+    }
+
 
     private void OnCollisionEnter(Collision collision)
     {

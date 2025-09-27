@@ -14,13 +14,20 @@ public class IngameManager : MonoBehaviour
     [SerializeField] private GameObject bossNameObject;
 
     public int playerHp { get; private set; }
+    private const int maxPlayerHp = 10;
     public int bossHp { get; private set; }
+    private const int maxBossHp = 100;
+
+    private Coroutine sliderCoroutine;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         bossHpSlider.value = 0;
         playerHpSlider.value = 1;
+
+        playerHp = maxPlayerHp;
+        bossHp = maxBossHp;
     }
 
     private void Start()
@@ -58,5 +65,57 @@ public class IngameManager : MonoBehaviour
         }
 
         bossNameObject.gameObject.SetActive(true);
+    }
+
+    // 플레이어 피격
+    public void DamagePlayer(int value)
+    {
+        playerHp -= value;
+
+        if (playerHp < 0)
+        {
+            Debug.Log("게임 오버");
+        }
+
+        if(sliderCoroutine != null) StopCoroutine(sliderCoroutine);
+        sliderCoroutine = StartCoroutine(LerpDamage(true));
+    }
+
+    // 플레이어인지 AI인지 구분
+    public IEnumerator LerpDamage(bool isPlayer)
+    {
+        //yield return null;
+
+        float targetValue;
+        float sliderSpeed = 3f;
+
+        if (isPlayer)
+        {
+            targetValue = playerHp / (float)maxPlayerHp;
+
+            while (playerHpSlider.value != targetValue)
+            {
+                playerHpSlider.value = Mathf.MoveTowards(
+                    playerHpSlider.value,
+                    targetValue,
+                    sliderSpeed * Time.deltaTime
+                );
+                yield return null;
+            }
+        }
+        else
+        {
+            targetValue = bossHp / (float)maxBossHp;
+
+            while (bossHpSlider.value != targetValue)
+            {
+                bossHpSlider.value = Mathf.MoveTowards(
+                    bossHpSlider.value,
+                    targetValue,
+                    sliderSpeed * Time.deltaTime
+                );
+                yield return null;
+            }
+        }
     }
 }

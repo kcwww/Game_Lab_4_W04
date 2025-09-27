@@ -352,13 +352,23 @@ public class Boss : MonoBehaviour//, IParrying
                 Player.Instance.StartParrying();
             }
         }
+
+        if (other.CompareTag("Player")) // 플레이어와 충돌 했을 때
+        {
+            if (isParryingDamage || !isParrying) return; // 이미 패링 맞은 상태거나 패링 준비(공격 실행)이 아니라면 리턴
+            
+
+            Player.Instance.Damaged(1); // 임의로
+        }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    /*private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.CompareTag("Player")) // 플레이어와 충돌 했을 때
         {
             if (isParryingDamage) return; // 이미 패링 맞은 상태라면
+
+            Player.Instance.Damaged(5); // 임의로
         }
-    }
+    }*/
 }
