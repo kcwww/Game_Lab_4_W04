@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +11,11 @@ public class IngameManager : MonoBehaviour
     [SerializeField] private Slider playerHpSlider;
     [SerializeField] private Slider bossHpSlider;
     [SerializeField] private GameObject bossNameObject;
+
+    [Header("Counter")]
+    [SerializeField] private Sprite[] counterSprites;
+    [SerializeField] private GameObject couterObject;
+    [SerializeField] private Image counterImage;
 
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
@@ -120,4 +124,14 @@ public class IngameManager : MonoBehaviour
             }
         }
     }
+
+    public void CounterAttackOn()
+    {
+        couterObject.SetActive(true);
+
+        if (InputManager.Instance.connectGamePad) counterImage.sprite = counterSprites[1];
+        else counterImage.sprite = counterSprites[0];
+    }
+
+    public void CounterAttackOff() => couterObject.SetActive(false);
 }

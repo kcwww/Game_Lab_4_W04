@@ -60,6 +60,9 @@ public class Player : MonoBehaviour
     [Header("Hit")]
     [SerializeField] private GameObject hitEffect;
 
+    //[Header("Counter")]
+    public event EventHandler OnCounter;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -80,9 +83,14 @@ public class Player : MonoBehaviour
         InputManager.Instance.OffRun += (a, b) => isRun = false;
         InputManager.Instance.OnJump += InputManager_OnJump;
         InputManager.Instance.OnLockOnKeyboard += InputManager_OnLockOnKeyboard;
-        //InputManger_OnLockOn;
         InputManager.Instance.OnLockOnPad += InputManger_OnLockOn;
         InputManager.Instance.OnLockOffPad += InputManger_OnLockOff;
+        InputManager.Instance.OnCounter += InputManager_OnCounter;
+    }
+
+    private void InputManager_OnCounter(object sender, EventArgs e)
+    {
+        
     }
 
     private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)

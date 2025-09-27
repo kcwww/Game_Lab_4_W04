@@ -17,6 +17,7 @@ public class InputManager : MonoBehaviour
     public event EventHandler OnLockOnKeyboard;
     public event EventHandler OnLockOnPad;
     public event EventHandler OnLockOffPad;
+    public event EventHandler OnCounter;
 
     public PlayerInput playerInput {  get; private set; }
     public bool connectGamePad { get; private set; } = false;
@@ -45,8 +46,13 @@ public class InputManager : MonoBehaviour
         playerInput.Player.LockOnPad.started += LockOnPad_started;
         playerInput.Player.LockOnPad.canceled += LockOnPad_canceled;
 
-
         playerInput.Player.Parrying.performed += Parrying_performed;
+        playerInput.Player.Counter.performed += Counter_performed;
+    }
+
+    private void Counter_performed(InputAction.CallbackContext obj)
+    {
+        OnCounter?.Invoke(this, EventArgs.Empty);
     }
 
     private void LockOnPad_canceled(InputAction.CallbackContext obj)
@@ -137,6 +143,7 @@ public class InputManager : MonoBehaviour
         playerInput.Player.LockOnPad.canceled -= LockOnPad_canceled;
 
         playerInput.Player.Parrying.performed -= Parrying_performed;
+        playerInput.Player.Counter.performed -= Counter_performed;
 
         playerInput.Dispose();
     }

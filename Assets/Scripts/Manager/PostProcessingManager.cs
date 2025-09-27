@@ -90,7 +90,9 @@ public class PostProcessingManager : MonoBehaviour
     {
         Time.timeScale = 0.1f;
 
-        yield return new WaitForSecondsRealtime(0.85f);
+        IngameManager.Instance.CounterAttackOn(); // 카운터 온
+        yield return new WaitForSecondsRealtime(0.85f); // 기본 대기 시간
+        IngameManager.Instance.CounterAttackOff(); // 카운터 오프
 
         float duration = 0.3f; // 0.1초만에 복구하고 싶다면
         float elapsed = 0f;
