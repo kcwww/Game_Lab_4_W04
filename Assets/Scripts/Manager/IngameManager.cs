@@ -70,6 +70,8 @@ public class IngameManager : MonoBehaviour
     // 플레이어 피격
     public void DamagePlayer(int value)
     {
+        InputManager.Instance.OnMotor(0f, 0.35f, 0.1f, 0.5f, 0.4f, 1f);
+
         playerHp -= value;
 
         if (playerHp < 0)

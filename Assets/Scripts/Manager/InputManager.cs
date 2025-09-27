@@ -186,26 +186,23 @@ public class InputManager : MonoBehaviour
         return playerInput.Player.Look.ReadValue<Vector2>().normalized;
     }
 
-    // 진동 울리기
-    public void OnMotor()
+    // 진동 울리기 (디폴트는 패링 성공값)
+    public void OnMotor(float t = 0f, float d = 0.75f, float lowStart = 0.5f,
+    float lowEnd = 0.1f, float highStart = 1f, float highEnd = 0.4f)
     {
         if (!connectGamePad) return; // 컨트롤러 아니면 반환
 
         if(motorCoroutine != null) StopCoroutine(motorCoroutine);
-        motorCoroutine = StartCoroutine(MotorCoroutine());
+        motorCoroutine = StartCoroutine(MotorCoroutine(t,d,lowStart,lowEnd,highStart,highEnd));
     }
 
-    private IEnumerator MotorCoroutine()
+
+    // 디폴트 진동(패링 성공 시)
+    private IEnumerator MotorCoroutine(float t = 0f, float d = 0.75f, float lowStart = 0.5f,
+    float lowEnd = 0.1f, float highStart = 1f, float highEnd = 0.4f)
     {
         //gamepad.SetMotorSpeeds(0.8f, 0.8f);
         AnimationCurve curve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
-        float t = 0f;
-        float d = 0.75f;
-        float lowStart = 0.5f;
-        float lowEnd = 0.1f;
-        float highStart = 1f;
-        float highEnd = 0.4f;
 
         gamepad.SetMotorSpeeds(lowStart, highStart);
 
