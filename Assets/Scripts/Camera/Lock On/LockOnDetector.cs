@@ -19,7 +19,7 @@ public class LockOnDetector : MonoBehaviour
     public Transform origin;
 
     [Header("Detection Volume (Sphere)")]
-    [Min(0.1f)] public float radius = 20f;
+    float radius = 50f;
 
     [Header("Filters")]
     public LayerMask candidateLayer = ~0;               // 적/타깃 레이어

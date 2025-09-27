@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2788666525816525399}
   - component: {fileID: 1609205138882645448}
   - component: {fileID: 9075167463609343738}
+  - component: {fileID: 3021884631230639041}
   m_Layer: 0
   m_Name: Lock On Camera
   m_TagString: Untagged
@@ -30,13 +31,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9207280286881729969}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1521234, y: -0.00000000423223, z: 0.0000000024979017, w: 0.98836154}
+  m_LocalRotation: {x: 0.15212336, y: 0, z: 0, w: 0.98836154}
   m_LocalPosition: {x: 0, y: 3.0070581, z: -9.537169}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 17.5, y: 0, z: 0}
 --- !u!114 &8114136490811132098
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -266,3 +267,48 @@ MonoBehaviour:
   obstacleLayers:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &3021884631230639041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9207280286881729969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f7737765f3e9a4793e40924a4db73a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selector: {fileID: 0}
+  player: {fileID: 0}
+  targetGroup: {fileID: 0}
+  groupFraming: {fileID: 2788666525816525399}
+  nearDistance: 3
+  farDistance: 20
+  sizeAtNear: 0.2
+  sizeAtFar: 0.8
+  distanceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sizeDamping: 0.12
