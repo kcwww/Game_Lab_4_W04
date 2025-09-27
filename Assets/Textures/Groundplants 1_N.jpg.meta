@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: bba8172718050c446a0a4c28a797fdc7
+AssetOrigin:
+  serializedVersion: 1
+  productId: 17100
+  packageName: Grass And Flowers Pack 1
+  packageVersion: 1
+  assetPath: Assets/Grass And Flowers Pack 1/Ground Textures/Groundplants 1_N.jpg
+  uploadId: 22655
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -7,7 +14,7 @@ TextureImporter:
   mipmaps:
     mipMapMode: 0
     enableMipMap: 1
-    sRGBTexture: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -54,7 +61,7 @@ TextureImporter:
   alphaUsage: 1
   alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 0
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -115,10 +122,3 @@ TextureImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 17100
-  packageName: Grass And Flowers Pack 1
-  packageVersion: 1
-  assetPath: Assets/Grass And Flowers Pack 1/Ground Textures/Groundplants 1_N.jpg
-  uploadId: 22655
