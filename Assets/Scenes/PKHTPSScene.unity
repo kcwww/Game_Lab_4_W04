@@ -28183,7 +28183,7 @@ PrefabInstance:
     - target: {fileID: 849249387317151209, guid: 355099337933a4741a46eff1eee0d271, type: 3}
       propertyPath: followCamera
       value: 
-      objectReference: {fileID: 103497841}
+      objectReference: {fileID: 1670126074}
     - target: {fileID: 1099342877706848349, guid: 355099337933a4741a46eff1eee0d271, type: 3}
       propertyPath: viewCamera
       value: 

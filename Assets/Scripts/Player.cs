@@ -11,7 +11,8 @@ public class Player : MonoBehaviour
     [Header("Compnent")]
     private Rigidbody rb;
     private Animator anim;
-    [SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
+    //[SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
+    [SerializeField] Camera followCamera;
     [field: SerializeField] public Transform followTarget { get; private set; }
     //[field: SerializeField] public ParryingPivot parryingBoxTrigger { get; private set; } // 패링 박스 콜라이더
 
