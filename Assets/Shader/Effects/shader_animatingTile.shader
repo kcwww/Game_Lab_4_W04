@@ -4,7 +4,7 @@ Shader "WooArt/Animating Texture by Age_OneShot"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _Repeat("Repeat Amount", Range(1, 10)) = 1.0
-        _Speed("Speed", Range(0.1, 10)) = 1.0
+        _Speed("Speed", Range(0.1, 20)) = 1.0
         _Emissive("Emissive", Range(1,5)) = 1.0
     }
     SubShader
