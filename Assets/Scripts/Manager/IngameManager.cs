@@ -27,6 +27,7 @@ public class IngameManager : MonoBehaviour
     public GameObject xParticle;
     public GameObject xTurretParicle;
     public GameObject bossParticle;
+    public GameObject slashTurretParticle;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;

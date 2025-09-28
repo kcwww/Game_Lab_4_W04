@@ -39,6 +39,7 @@ public class Boss : MonoBehaviour//, IParrying
     private bool isAttack = false; // 공격 중인지 체크
     private GroundSlashShooter groundSlashShooter;
     public GameObject[] turretObject; // 포탑 위치
+    public Transform alter;
     public bool[] isTurret = {true, true, true, true}; // 포탑 활성화 여부
     private int turretCount = 4; // 현재 남은 포탑 갯수
 
@@ -143,7 +144,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         int ran = Random.Range(0, curPatterCount);
 
-        /*switch (ran)
+        switch (ran)
         {
             case 0:
                 HorizontalSmash();
@@ -154,9 +155,9 @@ public class Boss : MonoBehaviour//, IParrying
             case 2:
                 GroundSlash();
                 break;
-        }*/
+        }
 
-        Layser();
+        //Layser();
 
         curAttackTimer = attackTimer;
     }
@@ -412,16 +413,20 @@ public class Boss : MonoBehaviour//, IParrying
 
 
         // 2. 방향 계산
-        Vector3 dir = (turretObject[index].transform.position - transform.position);
+        Vector3 dir = (alter.position - transform.position);
         dir.y = 0;
         dir = dir.normalized;
         Vector3 startPos = rb.position;
-        Vector3 endPos = turretObject[index].transform.position + dir * 2 + new Vector3(0,10,0); // 조금 뒤에 뒤랑 위로
+        Vector3 endPos = alter.position + dir * 2 + new Vector3(0,10,0); // 조금 뒤에 뒤랑 위로
+
+        dir = (turretObject[index].transform.position - transform.position);
+        dir.y = 0;
+        dir = dir.normalized;
 
         transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+
         IngameManager.Instance.bossParticle.transform.position = startPos;
         IngameManager.Instance.bossParticle.SetActive(true);
-
 
         float dashDuration = 0.05f; // 대시 시간
         float elapsed = 0f;
@@ -442,12 +447,12 @@ public class Boss : MonoBehaviour//, IParrying
         IngameManager.Instance.bossParticle.SetActive(false);
 
         // 방향 재 갱신
-        dir = (turretObject[index].transform.position - transform.position);
+        dir = (rb.position - startPos);
         dir.y = 0;
         dir = dir.normalized;
+        
+        // 텍스트 실행
 
-        // 3. 방향 고정 및 텍스트 실행
-        transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
 
         yield return new WaitForSeconds(0.3f); // 잠시 대기
 
@@ -464,18 +469,20 @@ public class Boss : MonoBehaviour//, IParrying
         anim.SetTrigger(SmashAnim);
         aiText.text = "";
 
-        IngameManager.Instance.slashParticle.SetActive(true);
+        IngameManager.Instance.slashTurretParticle.SetActive(true);
+        IngameManager.Instance.slashTurretParticle.transform.position = turretObject[index].transform.position;
         IngameManager.Instance.hitParticle.SetActive(true);
         IngameManager.Instance.hitParticle.transform.position = turretObject[index].transform.position;
-        IngameManager.Instance.xTurretParicle.transform.position = turretObject[index].transform.position;
         IngameManager.Instance.xTurretParicle.SetActive(true);
+        IngameManager.Instance.xTurretParicle.transform.position = turretObject[index].transform.position;
 
         yield return new WaitForSeconds(1f);
 
 
-        IngameManager.Instance.slashParticle.SetActive(false);
+        IngameManager.Instance.slashTurretParticle.SetActive(false);
         IngameManager.Instance.hitParticle.SetActive(false);
         IngameManager.Instance.xTurretParicle.SetActive(false);
+        transform.rotation = Quaternion.LookRotation(dir, Vector3.up); // 복귀 방향 맞추기
 
         // 5. 레이저 발사
 
