@@ -369,7 +369,7 @@ public class Boss : MonoBehaviour//, IParrying
         aiText.text = "";
 
         Player.Instance.GetEnemyPos(transform);
-        Player.Instance.SlashParrying(); // 참격 전용
+        //Player.Instance.SlashParrying(); // 참격 전용
 
         anim.SetBool(GroundSlashAnim, false);
         anim.SetTrigger(GroundSlashOnAnim);

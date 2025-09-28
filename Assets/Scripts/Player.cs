@@ -46,6 +46,7 @@ public class Player : MonoBehaviour
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
     public bool parryingDelay { get; private set; } = false; // 패링 딜레이 변수
     public bool isSlashParrying { get; private set; } = false; // 참격 패링 성공 여부
+    public bool isAISlashDelay = false; // AI 자체 패링 감지 로직
     public bool isSlashDelay = false; // 참격 패링 했을 때 딜레이
    // public bool isInputSlash { get; private set; } = false; // 현재 패링 공격이 들어왔는지 체크하는 변수
     public int enemyCount = 0; // 적 카운트
@@ -72,7 +73,8 @@ public class Player : MonoBehaviour
     public bool counterDelay = false; // 카운터 진행중 여부
     public event EventHandler OnCounter;
     private Transform enemyPos;
-    public bool isGroundSlashParrying => isSlashParrying && enemys.Count == 1; // 참격 패링인지
+    //public bool isGroundSlashParrying => isSlashParrying && enemys.Count == 1; // 참격 패링인지
+    public bool isGroundSlashParrying = false; // 참격이 성공했는가
 
     private void Awake()
     {
@@ -134,6 +136,7 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         counterDelay = false;
+        isSlashParrying = false;
     }
 
     private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)
@@ -372,10 +375,21 @@ public class Player : MonoBehaviour
     }
 
 
+    // 참격 패링 활성화
     public void SlashParrying() 
-    { 
-        isSlashParrying = true; 
+    {
+        isSlashParrying = true;
+        isAISlashDelay = true;
+        StartCoroutine(SlashAIDelay());
     }
+
+    // AI자체 피격 막기 위한 방지 로직
+    private IEnumerator SlashAIDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        isAISlashDelay = false;
+    }
+
     /*// 패링 애니메이션 실행
     public void ParryingAnimation()
     {
@@ -477,8 +491,10 @@ public class Player : MonoBehaviour
             if (i == slashIndex) SlashParrying(); // 참격 반경 활성화
             // 패링 성공이니 주변 적도 활성화
             NonEmptyParrying(); // 패링 성공이니 적도 존재함을 의미
-
         }
+
+        if (enemyCount == 1 && isSlashParrying) isGroundSlashParrying = true;
+
     }
 
     // 피격 받음
@@ -529,7 +545,7 @@ public class Player : MonoBehaviour
         isSlashDelay = true;
         groundSlashShooter.FireAt(enemyPos);
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
 
         isSlashDelay = false;
     }
