@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
     private const string WalkAnim = "isWalk";
     private const string GuardAnim = "isGuard";
     private const string ParryingAnim = "isParrying";
+    private const string StingAnim = "isSting";
+    private const string HitAnim = "isHit";
 
     [Header("Movement Status")]
     public bool isMoveInput { get; private set; } = false; // 입력이 들어간 상태
@@ -30,13 +32,11 @@ public class Player : MonoBehaviour
     private float rotationSpeed = 15;
 
     [Header("Gaurd")]
-    //private float curGuardTimer = 0f; // 현재 가드 타이머
-    //private const float guardTimer = 0.5f; // 1초의 딜레이
     public bool isGuard { get; private set; } = false;
 
     [Header("Parrying")]
     private const float parryingFailDistance = 0.6f; // 패링 실패 거리
-    private const float parryingRange = 1f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
+    private const float parryingRange = 4.5f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
     private const float parryingAnimationTimer = 0.2f; // 애니메이션 실행 속도(패링이 지속될 시간 같은 느낌)
     private const float parryingMultiTimer = 0.1f; // 패링의 중복 튕기기 가능한 시간(다중 공격)
     private const float parryingDelayTimer = 0.5f; // 패링 딜레이 타이머
@@ -45,10 +45,17 @@ public class Player : MonoBehaviour
     public bool parryingSucces { get; private set; } = false;// 패링의 성공 여부 판단 변수
     public bool isParrying { get; private set; } = false; // 패링 진행 확인 변수
     public bool parryingDelay { get; private set; } = false; // 패링 딜레이 변수
+    public bool isSlashParrying { get; private set; } = false; // 참격 패링 성공 여부
+    public bool isAISlashDelay = false; // AI 자체 패링 감지 로직
+    public bool isSlashDelay = false; // 참격 패링 했을 때 딜레이
+   // public bool isInputSlash { get; private set; } = false; // 현재 패링 공격이 들어왔는지 체크하는 변수
+    public int enemyCount = 0; // 적 카운트
+    public int slashIndex = -1;// slash는 1개만이라고 가정
     private List<Rigidbody> enemys = new List<Rigidbody>();
     public event EventHandler CheckParringDistance; // 패링 객체들의 거리를 판단
     public event EventHandler OnParrying; // 패링이 실행될 때 같이 진행할 이벤트 목록
     public event EventHandler OnParryingEnd; // 패링 끝날 때 같이 끝낼 이벤트 목록
+    private GroundSlashShooter groundSlashShooter; // 참격 패링용
 
     [Header("Lock On")]
     public LockOnOrchestrator lockOnOrchestrator;
@@ -59,6 +66,15 @@ public class Player : MonoBehaviour
 
     [Header("Hit")]
     [SerializeField] private GameObject hitEffect;
+    public bool isHit { get; private set; } = false;
+
+    [Header("Counter")]
+    public bool isCounter = false; // 카운터 상태 체크
+    public bool counterDelay = false; // 카운터 진행중 여부
+    public event EventHandler OnCounter;
+    private Transform enemyPos;
+    //public bool isGroundSlashParrying => isSlashParrying && enemys.Count == 1; // 참격 패링인지
+    public bool isGroundSlashParrying = false; // 참격이 성공했는가
 
     private void Awake()
     {
@@ -66,6 +82,7 @@ public class Player : MonoBehaviour
 
         rb= GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
+        groundSlashShooter = GetComponent<GroundSlashShooter>();
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
@@ -80,9 +97,46 @@ public class Player : MonoBehaviour
         InputManager.Instance.OffRun += (a, b) => isRun = false;
         InputManager.Instance.OnJump += InputManager_OnJump;
         InputManager.Instance.OnLockOnKeyboard += InputManager_OnLockOnKeyboard;
-        //InputManger_OnLockOn;
         InputManager.Instance.OnLockOnPad += InputManger_OnLockOn;
         InputManager.Instance.OnLockOffPad += InputManger_OnLockOff;
+        InputManager.Instance.OnCounter += InputManager_OnCounter;
+    }
+
+    private void InputManager_OnCounter(object sender, EventArgs e)
+    {
+        if (isHit) return;
+        if (!isCounter || counterDelay) return; // 카운터 활성화가 아니라면 return;
+        if (isGroundSlashParrying) // 참격이라면 초기화 후 막기
+        {
+            counterDelay = false;
+            isCounter = false;
+            return; // 참격만 반격중이면 리턴
+        }
+
+        Debug.Log("스팅 체크");
+
+        counterDelay = true;
+        isCounter = false;
+
+        anim.SetTrigger(StingAnim); // 스팅 애니메이션 실행
+
+        if (enemyPos == null) return;
+        Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
+        dir.Normalize();
+
+        rb.AddForce(dir * 90f, ForceMode.Impulse);
+
+        IngameManager.Instance.DamageBoss(1);
+        IngameManager.Instance.CounterAttackOff(); // UI 끄기
+        IngameManager.Instance.ResetTimer();
+        StartCoroutine(CounterDelay());
+    }
+
+    private IEnumerator CounterDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        counterDelay = false;
+        isSlashParrying = false;
     }
 
     private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)
@@ -115,6 +169,12 @@ public class Player : MonoBehaviour
         if (!isGuard) return; // 가드중이 아니라면 return
         if (parryingDelay) return; // 패링 쿨이 안지났다면 return
         if (isParrying) return; // 패링 이미 성공 시
+        if (counterDelay) return; // 반격중이면 못하게 막기
+        if (isHit) return;
+
+        slashIndex = -1; // 참격 초기화
+        enemyCount = 0; // 적 초기화
+        enemyPos = null; // 적 추격 초기화
 
         StartCoroutine(ParryingDelay());
 
@@ -175,6 +235,7 @@ public class Player : MonoBehaviour
 
     private void InputManager_OnGuard(object sender, System.EventArgs e)
     {
+        if (isHit) return;
         //if (curGuardTimer > 0) return; // 가드 쿨타임
         if (isGuard) return;
 
@@ -185,6 +246,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (counterDelay) return;
         Move();
     }
 
@@ -271,7 +333,7 @@ public class Player : MonoBehaviour
         parryingEmpty = false;
     }
 
-    // 패링 성공 (패링 범위 안에 객체 존재), 객체가 멈춰있으면 치명적인 오류임
+    // 패링 성공 (패링 범위 안에 객체 존재)
     public void SuccessParrying()
     {
         isParrying = true; // 패링 활성화
@@ -296,7 +358,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator ParryingAnimation()
     {
-        yield return new WaitForSecondsRealtime(parryingAnimationTimer);
+        yield return new WaitForSecondsRealtime(parryingAnimationTimer + 0.3f);   
 
         EndParrying();
     }
@@ -304,11 +366,28 @@ public class Player : MonoBehaviour
     // 패링 종료
     public void EndParrying()
     {
+        if (parryingSucces && !parryingEmpty && !isCounter) isCounter = true; // 패링 완전 성공(패링 성공 + 주변 적 존재(공격을 진행한))
         isParrying = false;
         parryingSucces = false;
         OnParryingEnd?.Invoke(this, EventArgs.Empty);
 
-        if(isGuard) anim.SetBool(GuardAnim, true);
+        if(isGuard && !isCounter) anim.SetBool(GuardAnim, true); // 지금 카운터 활성화 상태가 아닌 경우에ㅇㄴ
+    }
+
+
+    // 참격 패링 활성화
+    public void SlashParrying() 
+    {
+        isSlashParrying = true;
+        isAISlashDelay = true;
+        StartCoroutine(SlashAIDelay());
+    }
+
+    // AI자체 피격 막기 위한 방지 로직
+    private IEnumerator SlashAIDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        isAISlashDelay = false;
     }
 
     /*// 패링 애니메이션 실행
@@ -325,25 +404,32 @@ public class Player : MonoBehaviour
         enemys.Add(rigid);
     }
 
+    public void InputSlash(Rigidbody rigid)
+    {
+        slashIndex = enemys.Count; // 현재 인덱스를 저장
+        enemys.Add(rigid); // 참격 추가
+    }
+
     public void CheckParring()
     {
         // 리스트 목록 점검
-        foreach(var e in enemys)
+        for(int i=0; i<enemys.Count; i++)
         {
             // 1. 방향 및 거리 계산
-            Vector3 dir = transform.position - e.position; // 방향 추출
+            Vector3 dir = transform.position - enemys[i].position; // 방향 추출
             float distance = dir.magnitude - 1; // 보정 거리 (1은 스케일 값만큼 뺀것)
 
+            float failDistacne = IngameManager.Instance.isCoward ? parryingFailDistance / 2 : parryingFailDistance;
+
             // 2. 피격 범위까지 들어온 경우 실패
-            if (parryingFailDistance >= distance)
+            if (failDistacne >= distance)
             {
                 FailParrying(); // 패링 실패
-                NonEmptyParrying(); // 근처에 적이 존재 
                 return;
             }
 
             // 3. 후면인지 확인
-            Vector3 toRocket = (e.position - transform.position).normalized;
+            Vector3 toRocket = (enemys[i].position - transform.position).normalized;
             float dot = Vector3.Dot(transform.forward, toRocket);
 
             // 4. 패링 판정 이내에 들어온 경우
@@ -358,12 +444,12 @@ public class Player : MonoBehaviour
 
             // 5. 범위 밖 패링 물체 계산
             // 5-1. 속도 계산
-            float currentSpeed = rb.linearVelocity.magnitude; // 속도
+            float currentSpeed = enemys[i].linearVelocity.magnitude; // 속도
             if (currentSpeed <= 0.01f) currentSpeed = 0.01f; // 속력이 스피드보다 작다면 거의 멈춘급으로 계산
 
             // 5-2. 도달 예상 시간
             float timer = distance / currentSpeed;
-            Debug.Log(rb.gameObject.name + " 의 도달 예상 시간 : " + timer);
+            Debug.Log(enemys[i].gameObject.name + " 의 도달 예상 시간 : " + timer);
 
             // 5-3. 판단
             // 애니메이션 실행보다 더 빨리 도착한다면 맞는 판정 (안그러면 실행 중에 패링이 될테니)
@@ -378,20 +464,37 @@ public class Player : MonoBehaviour
             float reachableDistance = distance - currentSpeed * parryingAnimationTimer;
             Debug.Log(gameObject.name + " 의 도달 남은 거리 : " + reachableDistance);
             // 5-4-1. 패링에 성공 경우
-            if (reachableDistance < parryingRange)
+            if (reachableDistance <= parryingRange)
             {
                 if (dot < 0)
                 {
                     FailParrying(); // 실패
+                    return;
                 }
             }
-            
-            // 5-4-2. 아예 안맞는 경우 (헛스윙)
-            //else 
-           // {
-                //StartParrying(); // 헛방
-            //}
+            else // 헛방
+            {
+                if (!IngameManager.Instance.isCoward) // 겁쟁이가 아니라면 이건 진짜 패링 적용
+                {
+                    parryingSucces = false;
+                    return;
+                }
+                else // 일단 겁쟁이라도 헛방임
+                {
+                    return;
+                }
+            }
+
+            enemyCount++; // 적 카운트 증가
+
+            // 반격에 성공했는데 그게 참격이라면
+            if (i == slashIndex) SlashParrying(); // 참격 반경 활성화
+            // 패링 성공이니 주변 적도 활성화
+            NonEmptyParrying(); // 패링 성공이니 적도 존재함을 의미
         }
+
+        if (enemyCount == 1 && isSlashParrying) isGroundSlashParrying = true;
+
     }
 
     // 피격 받음
@@ -411,6 +514,41 @@ public class Player : MonoBehaviour
         hitEffect.gameObject.SetActive(false);
     }
 
+    public void GetEnemyPos(Transform pos)
+    {
+        enemyPos = pos;
+    }
+    
+    public void Hit()
+    {
+        if (isHit) return;
+        isHit = true;
+        anim.SetTrigger(HitAnim);
+        StartCoroutine(HitRoutine());
+    }
+
+    private IEnumerator HitRoutine()
+    {
+        yield return new WaitForSeconds(0.5f);
+        isHit = false;
+    }
+
+    // 참격 반격
+    public void ParryingGroundSlash()
+    {
+        if (isSlashDelay) return;
+        StartCoroutine(SlashDelay());
+    }
+
+    private IEnumerator SlashDelay()
+    {
+        isSlashDelay = true;
+        groundSlashShooter.FireAt(enemyPos);
+
+        yield return new WaitForSeconds(0.5f);
+
+        isSlashDelay = false;
+    }
 
     private void OnCollisionEnter(Collision collision)
     {

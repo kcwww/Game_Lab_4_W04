@@ -198,7 +198,7 @@ MonoBehaviour:
     x: 5283
     y: 2716
     width: 6220
-    height: 2717
+    height: 2741
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -18241,7 +18241,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 2.3
+      m_SerializableObject: 0.8
     m_Space: -1
   m_Property:
     name: _NoiseAmp
@@ -18249,8 +18249,7 @@ MonoBehaviour:
       m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
         PublicKeyToken=b77a5c561934e089
   m_Direction: 0
-  m_LinkedSlots:
-  - {fileID: 8926484042661616774}
+  m_LinkedSlots: []
 --- !u!114 &8926484042661616760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18652,7 +18651,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.AnimationCurve, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"frames":[{"time":-0.004423592239618301,"value":0.25187796354293826,"inTangent":0.5203335881233215,"outTangent":0.5203335881233215,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.711754322052002,"value":0.0027468502521514894,"inTangent":-0.3528132438659668,"outTangent":-0.3528132438659668,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false}],"preWrapMode":8,"postWrapMode":8,"version":1}'
+      m_SerializableObject: '{"frames":[{"time":-0.004423592239618301,"value":0.25187796354293826,"inTangent":3.476684331893921,"outTangent":3.476684331893921,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false},{"time":0.711754322052002,"value":0.0027468502521514894,"inTangent":-0.3528132438659668,"outTangent":-0.3528132438659668,"tangentMode":0,"leftTangentMode":0,"rightTangentMode":0,"broken":false}],"preWrapMode":8,"postWrapMode":8,"version":1}'
     m_Space: -1
   m_Property:
     name: curve
@@ -18731,7 +18730,6 @@ MonoBehaviour:
   m_Direction: 1
   m_LinkedSlots:
   - {fileID: 8926484042661616758}
-  - {fileID: 8926484042661616759}
   - {fileID: 8926484042661616760}
   - {fileID: 8926484042661616761}
   - {fileID: 8926484042661616766}

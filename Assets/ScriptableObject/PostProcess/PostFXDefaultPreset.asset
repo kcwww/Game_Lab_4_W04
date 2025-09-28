@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unscaledTime: 1
   useCurvePulse: 1
-  totalDuration: 1
+  totalDuration: 2
   masterCurve:
     serializedVersion: 2
     m_Curve:

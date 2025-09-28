@@ -1,8 +1,8 @@
 using System.Collections;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.ParticleSystem;
 
 public class IngameManager : MonoBehaviour
 {
@@ -13,12 +13,27 @@ public class IngameManager : MonoBehaviour
     [SerializeField] private Slider bossHpSlider;
     [SerializeField] private GameObject bossNameObject;
 
+    [Header("Counter")]
+    [SerializeField] private Sprite[] counterSprites;
+    [SerializeField] private GameObject couterObject;
+    [SerializeField] private Image counterImage;
+
+    [Header("GameMode")]
+    public bool isCoward { get; private set; } = true; // 기본 노말 모드
+
+    [Header("Effect")]
+    public GameObject hitParticle;
+    public GameObject slashParticle;
+    public GameObject xParticle;
+   // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
     public int bossHp { get; private set; }
-    private const int maxBossHp = 100;
+    private const int maxBossHp = 15;
 
     private Coroutine sliderCoroutine;
+    private Coroutine timeCoroutine;
+    private Coroutine bossHitCoroutine;
 
     private void Awake()
     {
@@ -81,6 +96,33 @@ public class IngameManager : MonoBehaviour
 
         if(sliderCoroutine != null) StopCoroutine(sliderCoroutine);
         sliderCoroutine = StartCoroutine(LerpDamage(true));
+
+        Player.Instance.Hit();
+    }
+
+    public void DamageBoss(int value)
+    {
+        bossHp -= value;
+
+        if (bossHp < 0)
+        {
+            Debug.Log("게임 클리어");
+        }
+
+        if (sliderCoroutine != null) StopCoroutine(sliderCoroutine);
+        sliderCoroutine = StartCoroutine(LerpDamage(false));
+
+        if (bossHitCoroutine != null) StopCoroutine(bossHitCoroutine);
+        bossHitCoroutine = StartCoroutine(BossHit());
+    }
+
+    public IEnumerator BossHit()
+    {
+        hitParticle.SetActive(true);
+        hitParticle.transform.position = Boss.Instance.transform.position;
+
+        yield return new WaitForSeconds(0.5f);
+        hitParticle.SetActive(false);
     }
 
     // 플레이어인지 AI인지 구분
@@ -119,5 +161,57 @@ public class IngameManager : MonoBehaviour
                 yield return null;
             }
         }
+    }
+
+    public void CounterAttackOn()
+    {
+        couterObject.SetActive(true);
+
+        if (InputManager.Instance.connectGamePad) counterImage.sprite = counterSprites[1];
+        else counterImage.sprite = counterSprites[0];
+    }
+
+    public void CounterAttackOff()
+    {
+        Player.Instance.isCounter = false; // 비활성화
+        Player.Instance.counterDelay = false;
+        couterObject.SetActive(false);
+    }
+    // 슬로우 모션 진행
+    public void SlowTimer()
+    {
+        if (timeCoroutine != null) StopCoroutine(timeCoroutine);
+        timeCoroutine = StartCoroutine(TimeCoroutine());
+    }
+
+    // 슬로우 초기화
+    public void ResetTimer()
+    {
+        if (timeCoroutine != null) StopCoroutine(timeCoroutine);
+        Time.timeScale = 1.0f;
+    }
+
+    private IEnumerator TimeCoroutine()
+    {
+        Time.timeScale = 0.1f;
+
+        // 참격이 아닐때만 (참격이랑 다중 공격은 제외)
+        if(!Player.Instance.isGroundSlashParrying) CounterAttackOn(); // 카운터 온
+        yield return new WaitForSecondsRealtime(1.5f); // 기본 대기 시간
+        CounterAttackOff(); // 카운터 오프
+
+        float duration = 0.3f; // 0.1초만에 복구하고 싶다면
+        float elapsed = 0f;
+        float start = 0.5f;
+        float end = 1f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime; // timeScale 영향 안 받게
+            Time.timeScale = Mathf.Lerp(start, end, elapsed / duration);
+            yield return null;
+        }
+
+        Time.timeScale = 1f; // 보정
     }
 }
