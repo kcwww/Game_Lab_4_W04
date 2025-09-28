@@ -5069,7 +5069,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   origin: {fileID: 1224655622753396919}
-  radius: 30
   candidateLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -5381,6 +5380,7 @@ GameObject:
   - component: {fileID: 2260297657109171981}
   - component: {fileID: 849249387317151209}
   - component: {fileID: 325589695038563892}
+  - component: {fileID: 8926755274197716566}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -5403,6 +5403,7 @@ Transform:
   m_Children:
   - {fileID: 1224655622753396919}
   - {fileID: 1301162017435470568}
+  - {fileID: 1157479317879245284}
   - {fileID: 2427823022201433749}
   - {fileID: 5452366130523797376}
   - {fileID: 6053624264720132867}
@@ -5470,8 +5471,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followCamera: {fileID: 0}
   <followTarget>k__BackingField: {fileID: 1224655622753396919}
+  enemyCount: 0
+  slashIndex: -1
   lockOnOrchestrator: {fileID: 325589695038563892}
   hitEffect: {fileID: 0}
+  isCounter: 0
+  counterDelay: 0
 --- !u!114 &325589695038563892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5498,6 +5503,25 @@ MonoBehaviour:
   relaxOnScreenDuringBlend: 1
   quickCameraFallbackOnLoss: 1
   visualGraceSeconds: 0.08
+--- !u!114 &8926755274197716566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459539942591456591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3390990fa109dd748b57afbbbc6e8da3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectile: {fileID: 8000335460387544478, guid: 54ed48c2fbf77cc4fa5b91f41891cc00, type: 3}
+  firePoint: {fileID: 4790892786370786444}
+  fireRate: 4
+  yawOnly: 1
+  keepFirePointRoll: 0
+  prefabLocalForward: {x: 0, y: 0, z: 1}
+  prefabLocalUp: {x: 0, y: 1, z: 0}
 --- !u!1 &1515821433480889302
 GameObject:
   m_ObjectHideFlags: 0
@@ -5702,6 +5726,59 @@ Transform:
   - {fileID: 4603539495924742812}
   m_Father: {fileID: 4790892786370786444}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1754177349982440845
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1157479317879245284}
+  - component: {fileID: 4698703412273142101}
+  m_Layer: 0
+  m_Name: HitBox
+  m_TagString: Player
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1157479317879245284
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754177349982440845}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4790892786370786444}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4698703412273142101
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754177349982440845}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2, y: 2, z: 2}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &1953290802314759999
 GameObject:
   m_ObjectHideFlags: 0
@@ -10693,7 +10770,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.962, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2851474815404622327}
   - {fileID: 6402133279769422829}
@@ -11776,8 +11853,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.5, y: 2, z: 0.8}
-  m_Center: {x: 0, y: 0.5, z: 1.1}
+  m_Size: {x: 2.5, y: 2, z: 3}
+  m_Center: {x: 0, y: 0.5, z: 1.74}
 --- !u!54 &7788918362393436955
 Rigidbody:
   m_ObjectHideFlags: 0

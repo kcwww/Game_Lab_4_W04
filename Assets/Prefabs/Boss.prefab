@@ -565,8 +565,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1101,9 +1101,10 @@ GameObject:
   - component: {fileID: 7149419926184033487}
   - component: {fileID: 1008362310547171356}
   - component: {fileID: 3745419188439643057}
+  - component: {fileID: 2126502981574137670}
   m_Layer: 7
   m_Name: Boss
-  m_TagString: Player
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1191,9 +1192,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   aiText: {fileID: 6189212601359305365}
-  slashParticle: {fileID: 7616252659283776868}
-  hitParticle: {fileID: 0}
-  xParticle: {fileID: 0}
 --- !u!114 &3745419188439643057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1210,6 +1208,25 @@ MonoBehaviour:
   aimPoint: {fileID: 4534312552231550247}
   priorityBias: 0
   isLockable: 1
+--- !u!114 &2126502981574137670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6235559748465300777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3390990fa109dd748b57afbbbc6e8da3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectile: {fileID: 8000335460387544478, guid: 54ed48c2fbf77cc4fa5b91f41891cc00, type: 3}
+  firePoint: {fileID: 4534312552231550247}
+  fireRate: 4
+  yawOnly: 1
+  keepFirePointRoll: 0
+  prefabLocalForward: {x: 0, y: 0, z: 1}
+  prefabLocalUp: {x: 0, y: 1, z: 0}
 --- !u!1 &6264223414388093102
 GameObject:
   m_ObjectHideFlags: 0
@@ -2376,11 +2393,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7130cd890b33cdc48bd67fdce590c0d2, type: 3}
---- !u!1 &7616252659283776868 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 550881531794477261, guid: 7130cd890b33cdc48bd67fdce590c0d2, type: 3}
-  m_PrefabInstance: {fileID: 7932882547151013289}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8115469582989164974 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2200204354183201799, guid: 7130cd890b33cdc48bd67fdce590c0d2, type: 3}

@@ -6,7 +6,7 @@ TagManager:
   tags:
   - Ground
   - Parrying
-  - Card
+  - Enemy
   layers:
   - Default
   - TransparentFX

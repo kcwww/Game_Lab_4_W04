@@ -27,6 +27,9 @@ public class GroundSlash : MonoBehaviour
     float lastGroundY;
     float skin; // 콜라이더 하프높이/반경
 
+    [Header("Parrying")]
+    public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -37,6 +40,20 @@ public class GroundSlash : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
+        // 활성화하면 참격의 패링 여부를 등록
+        Player.Instance.CheckParringDistance += Player_CheckParringDistance;
+    }
+
+    private void Player_CheckParringDistance(object sender, System.EventArgs e)
+    {
+        Player.Instance.InputSlash(rb);
+    }
+
+    private void OnDisable()
+    {
+        // 이벤트 해제
+        Player.Instance.CheckParringDistance -= Player_CheckParringDistance;
     }
 
     void Start()
@@ -60,6 +77,7 @@ public class GroundSlash : MonoBehaviour
         if (slowDownDuration > 0f) StartCoroutine(SlowDown());
 
         if (destroyDelay > 0f) Destroy(gameObject, destroyDelay);
+
     }
 
     void FixedUpdate()
@@ -167,4 +185,47 @@ public class GroundSlash : MonoBehaviour
         }
     }
 #endif
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("충돌 감지");
+
+        if(collision.gameObject.CompareTag("Player")) // 플레이어가 맞았다면
+        {
+            Debug.Log("플레이어 : " + Player.Instance.isSlashDelay);
+            if (Player.Instance.isSlashDelay) return;
+            Player.Instance.Damaged(1); // 임의로
+            Destroy(gameObject);
+        }
+        else if(collision.gameObject.CompareTag("Enemey"))
+        {
+            Debug.Log("보스 : " + Player.Instance.isSlashParrying);
+
+            if (!Player.Instance.isSlashParrying) return; // 시간이나 로직을 세분화해야함
+            IngameManager.Instance.DamageBoss(1); // 임의로
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("Parrying"))
+        {
+        if (Player.Instance.isSlashDelay) return;
+            Debug.Log("참격 패링 충돌 감지");
+            if(Player.Instance.parryingSucces)
+            {
+                InputManager.Instance.OnMotor();
+                IngameManager.Instance.SlowTimer();
+                PostProcessingManager.Instance.PulseDefault();
+                Player.Instance.SlashParrying();
+                Player.Instance.StartParrying();
+                Player.Instance.GetEnemyPos(rb.transform);
+                Player.Instance.ParryingGroundSlash();
+                //StartCoroutine(HitCoroutine());
+                Destroy(gameObject);
+            }
+        }
+    }
+
 }

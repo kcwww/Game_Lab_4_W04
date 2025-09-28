@@ -22,8 +22,10 @@ public class IngameManager : MonoBehaviour
     public bool isCoward { get; private set; } = true; // 기본 노말 모드
 
     [Header("Effect")]
-    [SerializeField] private GameObject hitParticle;
-
+    public GameObject hitParticle;
+    public GameObject slashParticle;
+    public GameObject xParticle;
+   // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
     public int bossHp { get; private set; }
@@ -193,7 +195,8 @@ public class IngameManager : MonoBehaviour
     {
         Time.timeScale = 0.1f;
 
-        CounterAttackOn(); // 카운터 온
+        // 참격이 아닐때만 (참격이랑 다중 공격은 제외)
+        if(!Player.Instance.isGroundSlashParrying) CounterAttackOn(); // 카운터 온
         yield return new WaitForSecondsRealtime(1.5f); // 기본 대기 시간
         CounterAttackOff(); // 카운터 오프
 

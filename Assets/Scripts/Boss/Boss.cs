@@ -19,8 +19,12 @@ public class Boss : MonoBehaviour//, IParrying
     private const string SmashAnim = "isSmash";
     private const string GuardAnim = "isGuard";
     private const string DashSmashAnim = "isDashSmash";
+    private const string GroundSlashAnim = "isGroundSlash";
+    private const string GroundSlashOnAnim = "isGroundSlashOn";
+    //private const string 
     private const string HorizontalText = "가로베기";
     private const string VerticalText = "섬광일도";
+    private const string GroundSlashText = "대지참격";
 
     [Header("Parrying")]
     public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
@@ -31,23 +35,20 @@ public class Boss : MonoBehaviour//, IParrying
     private float curAttackTimer = 5f; // 현재 공격 쿨타임
     private float attackTimer = 5f; // 공격 쿨타임
     private bool isAttack = false; // 공격 중인지 체크
+    private GroundSlashShooter groundSlashShooter;
 
-    private float horizontalSpeed = 15f; // 가로베기 이동 속도
-    private bool isHorizontal = false; // 발도 체크
+    //private float horizontalSpeed = 15f; // 가로베기 이동 속도
+    //private bool isHorizontal = false; // 발도 체크
     private const float radiusRange = 2f; // 대시 범위 증감량
     private const float dashRadius = 5f; // 대시 기본 범위
     private float radius = 5f; // 기본 반지름 값
-    private int patterCount = 2;
+    private int patterCount = 3;
 
     [Header("Status")]
     private float speed = 5f;
     private float rotationSpeed = 5f;
 
     [Header("Particle")]
-    [SerializeField] private GameObject slashParticle;
-    [SerializeField] private GameObject hitParticle;
-    [SerializeField] private GameObject xParticle;
-    [SerializeField] private GameObject groundSlashParticle;
     private const float slashTimer = 0.5f;
 
 
@@ -60,6 +61,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
+        groundSlashShooter = GetComponent<GroundSlashShooter>();
         aiText.text = ""; // 문구 비활성화
     }
 
@@ -133,7 +135,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         int ran = Random.Range(0, patterCount);
 
-        switch (ran)
+        /*switch (ran)
         {
             case 0:
                 HorizontalSmash();
@@ -142,8 +144,11 @@ public class Boss : MonoBehaviour//, IParrying
                 DashAttack();
                 break;
             case 2:
+                GroundSlash();
                 break;
-        }
+        }*/
+
+        GroundSlash();
 
         curAttackTimer = attackTimer;
     }
@@ -197,21 +202,21 @@ public class Boss : MonoBehaviour//, IParrying
 
         yield return null; // 한 프레임 대기
 
-        slashParticle.SetActive(true);
-        hitParticle.SetActive(true);
-        hitParticle.transform.position = Player.Instance.transform.position;
+        IngameManager.Instance.slashParticle.SetActive(true);
+        IngameManager.Instance.hitParticle.SetActive(true);
+        IngameManager.Instance.hitParticle.transform.position = Player.Instance.transform.position;
         if (!isParryingDamage)
         {
-            xParticle.SetActive(true);
+            IngameManager.Instance.xParticle.SetActive(true);
             rb.MovePosition(endPos);
 
             Player.Instance.Damaged(1); // 임의로
         }
         isParrying = false;
         yield return new WaitForSeconds(slashTimer);
-        slashParticle.SetActive(false);
-        hitParticle.SetActive(false);
-        xParticle.SetActive(false);
+        IngameManager.Instance.slashParticle.SetActive(false);
+        IngameManager.Instance.hitParticle.SetActive(false);
+        IngameManager.Instance.xParticle.SetActive(false);
 
         //yield return new WaitForSecondsRealtime(0.1f); // 패링 유예기간
 
@@ -320,12 +325,12 @@ public class Boss : MonoBehaviour//, IParrying
 
         yield return null; // 한 프레임 대기
 
-        slashParticle.SetActive(true);
-        hitParticle.SetActive(true);
-        hitParticle.transform.position = Player.Instance.transform.position;
+        IngameManager.Instance.slashParticle.SetActive(true);
+        IngameManager.Instance.hitParticle.SetActive(true);
+        IngameManager.Instance.hitParticle.transform.position = Player.Instance.transform.position;
         if (!isParryingDamage)
         {
-            xParticle.SetActive(true);
+            IngameManager.Instance.xParticle.SetActive(true);
             rb.MovePosition(endPos);
 
             Player.Instance.Damaged(1); // 임의로
@@ -333,9 +338,9 @@ public class Boss : MonoBehaviour//, IParrying
 
         isParrying = false;
         yield return new WaitForSeconds(slashTimer);
-        slashParticle.SetActive(false);
-        hitParticle.SetActive(false);
-        xParticle.SetActive(false);
+        IngameManager.Instance.slashParticle.SetActive(false);
+        IngameManager.Instance.hitParticle.SetActive(false);
+        IngameManager.Instance.xParticle.SetActive(false);
 
         //yield return new WaitForSecondsRealtime(0.1f); // 패링 유예기간
 
@@ -347,7 +352,35 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void GroundSlash()
     {
+        anim.SetBool(GroundSlashAnim, true);
 
+        StartCoroutine(GroundSlashRoutine());
+    }
+
+    private IEnumerator GroundSlashRoutine()
+    {
+        foreach (var v in GroundSlashText)
+        {
+            aiText.text += v;
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        yield return new WaitForSeconds(0.3f);
+        aiText.text = "";
+
+        Player.Instance.GetEnemyPos(transform);
+        Player.Instance.SlashParrying(); // 참격 전용
+
+        anim.SetBool(GroundSlashAnim, false);
+        anim.SetTrigger(GroundSlashOnAnim);
+
+        yield return new WaitForSeconds(1f); // 애니메이션 시간 대기
+
+        groundSlashShooter.FireAt(Player.Instance.transform);
+
+        yield return new WaitForSeconds(3.5f); // 남은 대기 시간
+
+        isAttack = false;
     }
 
 
