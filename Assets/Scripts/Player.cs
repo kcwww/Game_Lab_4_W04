@@ -113,7 +113,7 @@ public class Player : MonoBehaviour
             return; // 참격만 반격중이면 리턴
         }
 
-        Debug.Log("스팅 체크");
+        //Debug.Log("스팅 체크");
 
         counterDelay = true;
         isCounter = false;
@@ -199,7 +199,7 @@ public class Player : MonoBehaviour
             }
             else StartParrying();
 
-            Debug.Log("패링 성공");
+            //Debug.Log("패링 성공");
         }
         else
         {
@@ -449,7 +449,7 @@ public class Player : MonoBehaviour
 
             // 5-2. 도달 예상 시간
             float timer = distance / currentSpeed;
-            Debug.Log(enemys[i].gameObject.name + " 의 도달 예상 시간 : " + timer);
+            //Debug.Log(enemys[i].gameObject.name + " 의 도달 예상 시간 : " + timer);
 
             // 5-3. 판단
             // 애니메이션 실행보다 더 빨리 도착한다면 맞는 판정 (안그러면 실행 중에 패링이 될테니)
@@ -462,7 +462,7 @@ public class Player : MonoBehaviour
             // 5-4. 애니메이션 실행중에 도달 못한다고 판단했을 때
             // 애니메이션을 제외한 남은 거리를 계산
             float reachableDistance = distance - currentSpeed * parryingAnimationTimer;
-            Debug.Log(gameObject.name + " 의 도달 남은 거리 : " + reachableDistance);
+            //Debug.Log(gameObject.name + " 의 도달 남은 거리 : " + reachableDistance);
             // 5-4-1. 패링에 성공 경우
             if (reachableDistance <= parryingRange)
             {
