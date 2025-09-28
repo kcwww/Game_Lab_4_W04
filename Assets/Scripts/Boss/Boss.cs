@@ -144,7 +144,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         int ran = Random.Range(0, curPatterCount);
 
-        switch (ran)
+        /*switch (ran)
         {
             case 0:
                 HorizontalSmash();
@@ -155,9 +155,9 @@ public class Boss : MonoBehaviour//, IParrying
             case 2:
                 GroundSlash();
                 break;
-        }
+        }*/
 
-        //Layser();
+        Layser();
 
         curAttackTimer = attackTimer;
     }
@@ -417,8 +417,9 @@ public class Boss : MonoBehaviour//, IParrying
         dir.y = 0;
         dir = dir.normalized;
         Vector3 startPos = rb.position;
-        Vector3 endPos = alter.position + dir * 2 + new Vector3(0,10,0); // 조금 뒤에 뒤랑 위로
+        Vector3 endPos = alter.position + dir * 2 + new Vector3(0,2,0); // 조금 뒤에 뒤랑 위로
 
+        Player.Instance.turretPos = turretObject[index].transform.position;
         dir = (turretObject[index].transform.position - transform.position);
         dir.y = 0;
         dir = dir.normalized;
@@ -478,15 +479,20 @@ public class Boss : MonoBehaviour//, IParrying
 
         yield return new WaitForSeconds(1f);
 
-
         IngameManager.Instance.slashTurretParticle.SetActive(false);
         IngameManager.Instance.hitParticle.SetActive(false);
         IngameManager.Instance.xTurretParicle.SetActive(false);
         transform.rotation = Quaternion.LookRotation(dir, Vector3.up); // 복귀 방향 맞추기
 
+        IngameManager.Instance.layserEffect.SetActive(true);
+        
         // 5. 레이저 발사
-
+        IngameManager.Instance.layserEffect.transform.position = turretObject[index].transform.position;
         yield return new WaitForSeconds(2f); // 애니메이션 시간 대기
+
+        IngameManager.Instance.GenerateLayser(turretObject[index].transform, Player.Instance.transform.position);
+
+
 
         // 6. 전장 복귀 및 있던 자리에 파티클 생성하기
 
@@ -555,6 +561,17 @@ public class Boss : MonoBehaviour//, IParrying
                 Player.Instance.StartParrying();
                 Player.Instance.GetEnemyPos(rb.transform);
                 StartCoroutine(HitCoroutine());
+            }
+            else //
+            {
+                if(Player.Instance.isParrying) // 아직 보정이 안끝났다면, 2차 검증
+                {
+                    ParryingDamage();
+                    InputManager.Instance.OnMotor();
+                    Player.Instance.StartParrying();
+                    Player.Instance.GetEnemyPos(rb.transform);
+                    StartCoroutine(HitCoroutine());
+                }
             }
         }
 

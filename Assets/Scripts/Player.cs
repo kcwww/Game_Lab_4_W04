@@ -76,6 +76,7 @@ public class Player : MonoBehaviour
     private Transform enemyPos;
     //public bool isGroundSlashParrying => isSlashParrying && enemys.Count == 1; // 참격 패링인지
     public bool isGroundSlashParrying = false; // 참격이 성공했는가
+    public Vector3 turretPos = Vector3.zero;
 
     private void Awake()
     {
@@ -546,6 +547,24 @@ public class Player : MonoBehaviour
     {
         isSlashDelay = true;
         groundSlashShooter.FireAt(enemyPos);
+
+        yield return new WaitForSeconds(0.5f);
+
+        isSlashDelay = false;
+    }
+
+    // 레이저 반격
+    public void ParryingLayser()
+    {
+        if (isSlashDelay) return;
+        StartCoroutine(LayserDelay());
+    }
+
+    private IEnumerator LayserDelay()
+    {
+        isSlashDelay = true;
+        IngameManager.Instance.GenerateLayser(transform, turretPos);
+        IngameManager.Instance.layserParticleEffect.transform.position = transform.position;
 
         yield return new WaitForSeconds(0.5f);
 

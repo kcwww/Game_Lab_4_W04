@@ -28,6 +28,9 @@ public class IngameManager : MonoBehaviour
     public GameObject xTurretParicle;
     public GameObject bossParticle;
     public GameObject slashTurretParticle;
+    public GameObject layserEffect;
+    public GameObject layserParticlePlayerEffect;
+    public Layser layserParticleEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
@@ -216,5 +219,11 @@ public class IngameManager : MonoBehaviour
         }
 
         Time.timeScale = 1f; // 보정
+    }
+
+    public void GenerateLayser(Transform pos, Vector3 target)
+    {
+        Layser layser = Instantiate(layserParticleEffect.gameObject, pos.position, pos.rotation).GetComponent<Layser>();
+        layser.Shoot(target);
     }
 }
