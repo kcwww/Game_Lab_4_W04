@@ -29,7 +29,7 @@ public class IngameManager : MonoBehaviour
     public GameObject bossParticle;
     public GameObject slashTurretParticle;
     public GameObject layserEffect;
-    public GameObject layserParticlePlayerEffect;
+    public GameObject layserParryPlayerEffect;
     public Layser layserParticleEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
@@ -223,7 +223,10 @@ public class IngameManager : MonoBehaviour
 
     public void GenerateLayser(Transform pos, Vector3 target)
     {
-        Layser layser = Instantiate(layserParticleEffect.gameObject, pos.position, pos.rotation).GetComponent<Layser>();
+        Vector3 dir = (target - pos.position).normalized;
+        Quaternion rot = Quaternion.LookRotation(dir);
+
+        Layser layser = Instantiate(layserParticleEffect.gameObject, pos.position, rot).GetComponent<Layser>();
         layser.Shoot(target);
     }
 }

@@ -564,7 +564,7 @@ public class Player : MonoBehaviour
     {
         isSlashDelay = true;
         IngameManager.Instance.GenerateLayser(transform, turretPos);
-        IngameManager.Instance.layserParticleEffect.transform.position = transform.position;
+        IngameManager.Instance.layserParryPlayerEffect.transform.position = transform.position;
 
         yield return new WaitForSeconds(0.5f);
 
