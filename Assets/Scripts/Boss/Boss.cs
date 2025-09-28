@@ -419,6 +419,9 @@ public class Boss : MonoBehaviour//, IParrying
         Vector3 endPos = turretObject[index].transform.position + dir * 2 + new Vector3(0,10,0); // 조금 뒤에 뒤랑 위로
 
         transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        IngameManager.Instance.bossParticle.transform.position = startPos;
+        IngameManager.Instance.bossParticle.SetActive(true);
+
 
         float dashDuration = 0.05f; // 대시 시간
         float elapsed = 0f;
@@ -434,6 +437,9 @@ public class Boss : MonoBehaviour//, IParrying
         }
 
         rb.MovePosition(endPos); // 마지막 위치 보정
+        yield return new WaitForSeconds(0.2f);
+
+        IngameManager.Instance.bossParticle.SetActive(false);
 
         // 방향 재 갱신
         dir = (turretObject[index].transform.position - transform.position);
@@ -461,15 +467,15 @@ public class Boss : MonoBehaviour//, IParrying
         IngameManager.Instance.slashParticle.SetActive(true);
         IngameManager.Instance.hitParticle.SetActive(true);
         IngameManager.Instance.hitParticle.transform.position = turretObject[index].transform.position;
-        IngameManager.Instance.xTurretParitle.transform.position = turretObject[index].transform.position;
-        IngameManager.Instance.xTurretParitle.SetActive(true);
+        IngameManager.Instance.xTurretParicle.transform.position = turretObject[index].transform.position;
+        IngameManager.Instance.xTurretParicle.SetActive(true);
 
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(1f);
 
 
         IngameManager.Instance.slashParticle.SetActive(false);
         IngameManager.Instance.hitParticle.SetActive(false);
-        IngameManager.Instance.xTurretParitle.SetActive(false);
+        IngameManager.Instance.xTurretParicle.SetActive(false);
 
         // 5. 레이저 발사
 
@@ -478,6 +484,9 @@ public class Boss : MonoBehaviour//, IParrying
         // 6. 전장 복귀 및 있던 자리에 파티클 생성하기
 
         elapsed = 0f;
+
+        IngameManager.Instance.bossParticle.transform.position = transform.position;
+        IngameManager.Instance.bossParticle.SetActive(true);
 
         // 전장 복귀
         while (elapsed < dashDuration)
@@ -491,6 +500,7 @@ public class Boss : MonoBehaviour//, IParrying
         }
 
         rb.MovePosition(startPos);
+        IngameManager.Instance.bossParticle.SetActive(false);
 
         //groundSlashShooter.FireAt(Player.Instance.transform);
 
