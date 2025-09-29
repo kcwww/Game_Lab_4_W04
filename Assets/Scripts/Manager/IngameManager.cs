@@ -33,9 +33,9 @@ public class IngameManager : MonoBehaviour
     public GameObject ExplosionEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
-    private const int maxPlayerHp = 10; //10
+    private const int maxPlayerHp = 1; //10
     public int bossHp { get; private set; }
-    private const int maxBossHp = 12; // 12
+    private const int maxBossHp = 2; // 12
 
     private Coroutine sliderCoroutine;
     private Coroutine timeCoroutine;
@@ -48,12 +48,13 @@ public class IngameManager : MonoBehaviour
     public GameObject timeLineObject;
     public bool isTimeLine = false;
     public GameObject timeLine1;
-
+    public GameObject cutScene2;
 
     public bool isGameClear = false;
 
     public GameOverFader gameOverFade;
     public GameOverFader gameClearFade;
+
 
 
     private void Awake()
@@ -133,11 +134,13 @@ public class IngameManager : MonoBehaviour
 
         if (bossHp <= 0)
         {
-            Debug.Log("게임 클리어");
+            if (bossHpSlider.value <= 0) return; 
             bossHpSlider.value = 0;
+            isTimeLine = true;
+            cutScene2.SetActive(true);
+
+            Debug.Log("게임 클리어");
             isGameClear = true;
-            gameClearFade.ShowGameClear();
-            //GameManager.Instance.GameClear();
 
             return;
         }
@@ -148,6 +151,17 @@ public class IngameManager : MonoBehaviour
         if (bossHitCoroutine != null) StopCoroutine(bossHitCoroutine);
         bossHitCoroutine = StartCoroutine(BossHit());
     }
+
+    /*private IEnumerator GameClearRoutine()
+    {
+        cutScene2.SetActive(true);
+    }*/
+
+    public void GameClear()
+    {
+        gameClearFade.ShowGameClear();
+    }
+
 
     public IEnumerator BossHit()
     {
