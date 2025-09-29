@@ -182,8 +182,6 @@ public class Boss : MonoBehaviour//, IParrying
 
         //DashAttack();
 
-        //Layser();
-        attackTimer = 1f;
         curAttackTimer = attackTimer;
     }
 

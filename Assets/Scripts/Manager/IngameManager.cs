@@ -2,7 +2,6 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.ParticleSystem;
 
 public class IngameManager : MonoBehaviour
 {
@@ -34,9 +33,9 @@ public class IngameManager : MonoBehaviour
     public GameObject ExplosionEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
-    private const int maxPlayerHp = 10;
+    private const int maxPlayerHp = 10; //10
     public int bossHp { get; private set; }
-    private const int maxBossHp = 15;
+    private const int maxBossHp = 12; // 12
 
     private Coroutine sliderCoroutine;
     private Coroutine timeCoroutine;
@@ -50,8 +49,17 @@ public class IngameManager : MonoBehaviour
     public bool isTimeLine = false;
     public GameObject timeLine1;
 
+
+    public bool isGameClear = false;
+
+    public GameOverFader gameOverFade;
+    public GameOverFader gameClearFade;
+
+
     private void Awake()
     {
+        Time.timeScale = 1f;
+
         if (Instance == null) Instance = this;
         bossHpSlider.value = 0;
         playerHpSlider.value = 1;
@@ -104,10 +112,13 @@ public class IngameManager : MonoBehaviour
 
         playerHp -= value;
 
-        if (playerHp < 0)
+        if (playerHp <= 0)
         {
             Debug.Log("게임 오버");
-            GameManager.Instance.GameOver();
+            playerHpSlider.value = 0;
+            gameOverFade.ShowGameOver();
+            //GameManager.Instance.GameOver();
+            return;
         }
 
         if(sliderCoroutine != null) StopCoroutine(sliderCoroutine);
@@ -120,10 +131,15 @@ public class IngameManager : MonoBehaviour
     {
         bossHp -= value;
 
-        if (bossHp < 0)
+        if (bossHp <= 0)
         {
             Debug.Log("게임 클리어");
-            GameManager.Instance.GameClear();
+            bossHpSlider.value = 0;
+            isGameClear = true;
+            gameClearFade.ShowGameClear();
+            //GameManager.Instance.GameClear();
+
+            return;
         }
 
         if (sliderCoroutine != null) StopCoroutine(sliderCoroutine);

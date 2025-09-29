@@ -7,7 +7,10 @@ public class TutorialDoor : MonoBehaviour
     public Slime slime;
     public Transform pivot; // 돌아갈 위치
 
-
+    private void Start()
+    {
+        if(!GameManager.Instance.isTutorial) animator.SetTrigger("isRotate");
+    }
 
     private void OnTriggerEnter(Collider other)
     {

@@ -27,10 +27,18 @@ public class GameOverFader : MonoBehaviour
     {
         if (!_busy)
         {
-            StartCoroutine(CoShow());
-            
+            StartCoroutine(CoShow());      
         }
 
+    }
+
+    [ContextMenu("Init Overlay Clear")]
+    public void ShowGameClear()
+    {
+        if (!_busy)
+        {
+            StartCoroutine(CoShow());
+        }
     }
 
     [ContextMenu("Hide Overlay")]
@@ -78,7 +86,11 @@ public class GameOverFader : MonoBehaviour
 
         // 1초 대기 후 로드씬
         yield return new WaitForSecondsRealtime(1f);
-        SceneManager.LoadScene(0);
+        if (!IngameManager.Instance.isGameClear)
+        {
+            SceneManager.UnloadSceneAsync(0);
+            SceneManager.LoadScene(0); // 클리어가 아닐때는 재로드
+        }
     }
 
     IEnumerator CoHide()
