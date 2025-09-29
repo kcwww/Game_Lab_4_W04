@@ -116,6 +116,9 @@ public class Player : MonoBehaviour
         {
             counterDelay = false;
             isCounter = false;
+            isSlashParrying = false;
+            IngameManager.Instance.CounterAttackOff(); // UI 끄기
+            IngameManager.Instance.ResetTimer();
             return; // 참격만 반격중이면 리턴
         }
 
@@ -127,13 +130,16 @@ public class Player : MonoBehaviour
         anim.SetTrigger(StingAnim); // 스팅 애니메이션 실행
         StartCoroutine(StartSting());
 
-        if (enemyPos == null) return;
-        Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
-        dir.Normalize();
+        if (enemyPos != null)
+        {
+            Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
+            dir.Normalize();
 
-        rb.AddForce(dir * 90f, ForceMode.Impulse);
+            rb.AddForce(dir * 90f, ForceMode.Impulse);
 
-        if(GameManager.Instance.isStart) IngameManager.Instance.DamageBoss(1);
+            if (GameManager.Instance.isStart) IngameManager.Instance.DamageBoss(1);
+        }
+
         IngameManager.Instance.CounterAttackOff(); // UI 끄기
         IngameManager.Instance.ResetTimer();
         StartCoroutine(CounterDelay());

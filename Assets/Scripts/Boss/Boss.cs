@@ -159,7 +159,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         int ran = Random.Range(0, curPatterCount);
 
-        /*switch (ran)
+        switch (ran)
         {
             case 0:
                 HorizontalSmash();
@@ -173,11 +173,11 @@ public class Boss : MonoBehaviour//, IParrying
             case 3:
                 Layser();
                 break;
-        }*/
+        }
 
         //DashAttack();
 
-        Layser();
+        //Layser();
 
         curAttackTimer = attackTimer;
     }

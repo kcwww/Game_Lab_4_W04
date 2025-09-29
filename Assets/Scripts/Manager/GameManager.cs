@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         isStart = true;
+        IngameManager.Instance.PlayBossUI();
     }
 
 }

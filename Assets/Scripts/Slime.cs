@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class Slime : MonoBehaviour
 {
@@ -33,6 +34,12 @@ public class Slime : MonoBehaviour
     [Header("Hit")]
     private bool isHitDelay = false; // 현재 피격 딜레이중인가
 
+
+    private bool isTutorial = false;
+
+
+    private Coroutine attackCoroutine;
+
     private void Awake()
     {
         anim = GetComponentInChildren<Animator>();
@@ -43,6 +50,10 @@ public class Slime : MonoBehaviour
     private void Start()
     {
         target = Player.Instance.transform;
+
+
+        if (!GameManager.Instance.isTutorial) isTutorial = true;
+        if (isTutorial) return;
 
         Player.Instance.CheckParringDistance += Player_CheckParringDistance;
         Player.Instance.OnParryingEnd += Player_EndParrying;
@@ -62,12 +73,15 @@ public class Slime : MonoBehaviour
 
     private void OnDisable()
     {
+        if (isTutorial) return;
+
         Player.Instance.CheckParringDistance -= Player_CheckParringDistance;
         Player.Instance.OnParryingEnd -= Player_EndParrying;
     }
 
     private void FixedUpdate()
     {
+        if (!GameManager.Instance.isTutorial) return;
         if (isParryingDamage) return;
         Move();
         Attack();
@@ -75,6 +89,7 @@ public class Slime : MonoBehaviour
 
     private void Update()
     {
+        if (!GameManager.Instance.isTutorial) return;
         if (!isAttack)
         {
             curAttackTimer -= Time.deltaTime;
@@ -115,7 +130,8 @@ public class Slime : MonoBehaviour
     {
         anim.SetBool(HorizontalAnim, true); // 발도 준비
 
-        StartCoroutine(SmashCoroutine());
+        if (attackCoroutine != null) StopCoroutine(attackCoroutine);
+        attackCoroutine = StartCoroutine(SmashCoroutine());
     }
 
     private IEnumerator SmashCoroutine()
@@ -201,8 +217,26 @@ public class Slime : MonoBehaviour
         isHitDelay = false;
     }
 
+    public void ResetPosition(Transform pos)
+    {
+        if (attackCoroutine != null) StopCoroutine(attackCoroutine);
+        if (!GameManager.Instance.isTutorial) return;
+        rb.linearVelocity = Vector3.zero;
+        rb.AddForce((pos.position - rb.position).normalized * 45, ForceMode.Impulse);
+
+        StartCoroutine(ResetPos(pos));
+    }
+
+    private IEnumerator ResetPos(Transform pos)
+    {
+        yield return new WaitForSeconds(0.5f);
+        rb.position = pos.position;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
+        if (!GameManager.Instance.isTutorial) return;
+
         if (other.CompareTag("Parrying"))
         {
             if (Player.Instance.parryingSucces) // 판정 성공일때만 진행
