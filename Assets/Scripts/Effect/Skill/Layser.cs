@@ -5,6 +5,8 @@ public class Layser : MonoBehaviour
 {
     private Rigidbody rb;
 
+    private Coroutine destroyObject;
+
     private void Awake()
     {
         rb= gameObject.GetComponent<Rigidbody>();
@@ -59,6 +61,9 @@ public class Layser : MonoBehaviour
             //Debug.Log("플레이어 : " + Player.Instance.isSlashDelay);
             if (Player.Instance.isSlashDelay) return;
             Player.Instance.Damaged(1); // 임의로
+            IngameManager.Instance.ExplositionStart(other.transform.position);
+
+            if (destroyObject != null) StopCoroutine(destroyObject);
             Destroy(gameObject);
         }
         else if (other.CompareTag("Enemy"))
@@ -67,6 +72,9 @@ public class Layser : MonoBehaviour
 
             if (!Player.Instance.isAISlashDelay) return; // 플레이어가 성공에 실패했다면 피격 x
             IngameManager.Instance.DamageBoss(1); // 임의로
+            IngameManager.Instance.ExplositionStart(other.transform.position);
+
+            if (destroyObject != null) StopCoroutine(destroyObject);
             Destroy(gameObject);
         }
         else if(other.CompareTag("Turret")) // 터렛이라면
@@ -74,7 +82,21 @@ public class Layser : MonoBehaviour
             if (!Player.Instance.isAISlashDelay) return; // 플레이어가 성공에 실패했다면 피격 x
 
             Boss.Instance.TurretRemove();
+            IngameManager.Instance.ExplositionStart(other.transform.position);
+
+            if (destroyObject != null) StopCoroutine(destroyObject);
             Destroy(gameObject);
         }
+        else if(other.CompareTag("Ground"))
+        {
+            destroyObject = StartCoroutine(DestroyLayser());
+        }
+    }
+
+    private IEnumerator DestroyLayser()
+    {
+        yield return new WaitForSeconds(0.5f);
+        IngameManager.Instance.ExplositionStart(transform.position);
+        Destroy(gameObject);
     }
 }

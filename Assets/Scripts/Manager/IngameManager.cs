@@ -31,6 +31,7 @@ public class IngameManager : MonoBehaviour
     public GameObject layserEffect;
     public GameObject layserParryPlayerEffect;
     public Layser layserParticleEffect;
+    public GameObject ExplosionEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
@@ -228,5 +229,19 @@ public class IngameManager : MonoBehaviour
 
         Layser layser = Instantiate(layserParticleEffect.gameObject, pos.position, rot).GetComponent<Layser>();
         layser.Shoot(target);
+    }
+
+    public void ExplositionStart(Vector3 pos)
+    {
+        ExplosionEffect.SetActive(true);
+        ExplosionEffect.transform.position = pos;
+
+        StartCoroutine(DistableExplosion());
+    }
+
+    private IEnumerator DistableExplosion()
+    {
+        yield return new WaitForSeconds(1f);
+        ExplosionEffect.SetActive(false);
     }
 }
