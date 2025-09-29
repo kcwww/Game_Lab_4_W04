@@ -61,6 +61,7 @@ public class Layser : MonoBehaviour
             //Debug.Log("플레이어 : " + Player.Instance.isSlashDelay);
             if (Player.Instance.isSlashDelay) return;
             Player.Instance.Damaged(1); // 임의로
+            Player.Instance.BackStep(rb.position);
             IngameManager.Instance.ExplositionStart(other.transform.position);
 
             if (destroyObject != null) StopCoroutine(destroyObject);

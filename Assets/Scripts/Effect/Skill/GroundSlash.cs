@@ -211,6 +211,7 @@ public class GroundSlash : MonoBehaviour
             //Debug.Log("플레이어 : " + Player.Instance.isSlashDelay);
             if (Player.Instance.isSlashDelay) return;
             Player.Instance.Damaged(1); // 임의로
+            Player.Instance.BackStep(rb.position);
             Destroy(gameObject);
         }
         else if (other.CompareTag("Enemy"))

@@ -160,7 +160,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         int ran = Random.Range(0, curPatterCount);
 
-        /*switch (ran)
+        switch (ran)
         {
             case 0:
                 HorizontalSmash();
@@ -174,14 +174,14 @@ public class Boss : MonoBehaviour//, IParrying
             case 3:
                 Layser();
                 break;
-        }*/
+        }
 
-        HorizontalSmash();
+        //HorizontalSmash();
 
         //DashAttack();
 
         //Layser();
-
+        attackTimer = 1f;
         curAttackTimer = attackTimer;
     }
 
@@ -242,12 +242,13 @@ public class Boss : MonoBehaviour//, IParrying
                 anim.SetTrigger(SmashAnim);
             }
 
-            if (!isJunjo && timeToReach <= 0.75f)
+            if (!isJunjo && timeToReach <= 0.5f)
             {
                 isJunjo = true;
-                junjoEffect.SetActive(true);
                 Time.timeScale = 0.3f;
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(0.05f);
+                junjoEffect.SetActive(true);
+                yield return new WaitForSeconds(0.15f);
                 Time.timeScale = 1f;
             }
             yield return new WaitForFixedUpdate();
@@ -266,6 +267,7 @@ public class Boss : MonoBehaviour//, IParrying
             rb.MovePosition(endPos);
 
             Player.Instance.Damaged(1); // 임의로
+            Player.Instance.BackStep(rb.position);
         }
         isParrying = false;
         yield return new WaitForSeconds(slashTimer);
@@ -397,6 +399,7 @@ public class Boss : MonoBehaviour//, IParrying
             IngameManager.Instance.xParticle.SetActive(true);
 
             Player.Instance.Damaged(1); // 임의로
+            Player.Instance.BackStep(rb.position);
         }
 
         isParrying = false;

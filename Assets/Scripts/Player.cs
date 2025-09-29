@@ -606,4 +606,12 @@ public class Player : MonoBehaviour
             isGround = true;
         }
     }
+
+    public void BackStep(Vector3 dir)
+    {
+        dir = rb.position - dir;
+        dir.y = 0;
+
+        rb.AddForce(dir.normalized * 45, ForceMode.Impulse);
+    }
 }

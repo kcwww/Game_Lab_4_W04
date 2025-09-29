@@ -100,7 +100,7 @@ public class CameraDirectionFix : MonoBehaviour
     void EndLock()
     {
         isPressing = false;
-
+        Debug.Log("444");
         // 입력 축 복구
         if (axisController != null) axisController.enabled = true;
     }
