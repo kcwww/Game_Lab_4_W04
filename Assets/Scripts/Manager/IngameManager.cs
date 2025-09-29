@@ -48,6 +48,7 @@ public class IngameManager : MonoBehaviour
     [Header("TimeLine")]
     public GameObject timeLineObject;
     public bool isTimeLine = false;
+    public GameObject timeLine1;
 
     private void Awake()
     {
@@ -254,18 +255,19 @@ public class IngameManager : MonoBehaviour
         ExplosionEffect.SetActive(false);
     }
 
-    public void StartTimeLine()
+    /*public void StartTimeLine()
     {
         playerHpSlider.gameObject.SetActive(false);
         isTimeLine = true;
         timeLineObject.SetActive(true);
-    }
+    }*/
     
     public void StopStartTimeLine()
     {
         isTimeLine = false;
         timeLineObject.SetActive(false);
         playerHpSlider.gameObject.SetActive(true);
+        timeLine1.SetActive(false);
         PlayBossUI();
     }
 }

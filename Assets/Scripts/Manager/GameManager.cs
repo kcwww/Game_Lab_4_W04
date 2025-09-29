@@ -28,7 +28,8 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         isStart = true;
-        IngameManager.Instance.StartTimeLine();
+        //IngameManager.Instance.StartTimeLine();
+        IngameManager.Instance.StopStartTimeLine();
         //IngameManager.Instance.PlayBossUI();
     }
 
