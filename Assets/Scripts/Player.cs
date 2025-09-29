@@ -11,7 +11,8 @@ public class Player : MonoBehaviour
     [Header("Compnent")]
     private Rigidbody rb;
     private Animator anim;
-    [SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
+    //[SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
+    [SerializeField] Camera followCamera;
     [field: SerializeField] public Transform followTarget { get; private set; }
     //[field: SerializeField] public ParryingPivot parryingBoxTrigger { get; private set; } // 패링 박스 콜라이더
 
@@ -75,6 +76,7 @@ public class Player : MonoBehaviour
     private Transform enemyPos;
     //public bool isGroundSlashParrying => isSlashParrying && enemys.Count == 1; // 참격 패링인지
     public bool isGroundSlashParrying = false; // 참격이 성공했는가
+    public Vector3 turretPos = Vector3.zero;
 
     private void Awake()
     {
@@ -113,7 +115,7 @@ public class Player : MonoBehaviour
             return; // 참격만 반격중이면 리턴
         }
 
-        Debug.Log("스팅 체크");
+        //Debug.Log("스팅 체크");
 
         counterDelay = true;
         isCounter = false;
@@ -199,7 +201,7 @@ public class Player : MonoBehaviour
             }
             else StartParrying();
 
-            Debug.Log("패링 성공");
+            //Debug.Log("패링 성공");
         }
         else
         {
@@ -287,6 +289,7 @@ public class Player : MonoBehaviour
         // 1) 이동축은 항상 카메라 기준
         Vector3 camFwd = Vector3.ProjectOnPlane(followCamera.transform.forward, up).normalized;
         Vector3 camRight = Vector3.ProjectOnPlane(followCamera.transform.right, up).normalized;
+        
 
         Vector3 inputDir = (camRight * dir.x + camFwd * dir.y);
 
@@ -449,7 +452,7 @@ public class Player : MonoBehaviour
 
             // 5-2. 도달 예상 시간
             float timer = distance / currentSpeed;
-            Debug.Log(enemys[i].gameObject.name + " 의 도달 예상 시간 : " + timer);
+            //Debug.Log(enemys[i].gameObject.name + " 의 도달 예상 시간 : " + timer);
 
             // 5-3. 판단
             // 애니메이션 실행보다 더 빨리 도착한다면 맞는 판정 (안그러면 실행 중에 패링이 될테니)
@@ -462,7 +465,7 @@ public class Player : MonoBehaviour
             // 5-4. 애니메이션 실행중에 도달 못한다고 판단했을 때
             // 애니메이션을 제외한 남은 거리를 계산
             float reachableDistance = distance - currentSpeed * parryingAnimationTimer;
-            Debug.Log(gameObject.name + " 의 도달 남은 거리 : " + reachableDistance);
+            //Debug.Log(gameObject.name + " 의 도달 남은 거리 : " + reachableDistance);
             // 5-4-1. 패링에 성공 경우
             if (reachableDistance <= parryingRange)
             {
@@ -544,6 +547,24 @@ public class Player : MonoBehaviour
     {
         isSlashDelay = true;
         groundSlashShooter.FireAt(enemyPos);
+
+        yield return new WaitForSeconds(0.5f);
+
+        isSlashDelay = false;
+    }
+
+    // 레이저 반격
+    public void ParryingLayser()
+    {
+        if (isSlashDelay) return;
+        StartCoroutine(LayserDelay());
+    }
+
+    private IEnumerator LayserDelay()
+    {
+        isSlashDelay = true;
+        IngameManager.Instance.GenerateLayser(transform, turretPos);
+        IngameManager.Instance.layserParryPlayerEffect.transform.position = transform.position;
 
         yield return new WaitForSeconds(0.5f);
 

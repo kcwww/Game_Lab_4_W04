@@ -208,14 +208,14 @@ public class GroundSlash : MonoBehaviour
         }
         else if (other.CompareTag("Player")) // 플레이어가 맞았다면
         {
-            Debug.Log("플레이어 : " + Player.Instance.isSlashDelay);
+            //Debug.Log("플레이어 : " + Player.Instance.isSlashDelay);
             if (Player.Instance.isSlashDelay) return;
             Player.Instance.Damaged(1); // 임의로
             Destroy(gameObject);
         }
         else if (other.CompareTag("Enemy"))
         {
-            Debug.Log("보스 : " + Player.Instance.isAISlashDelay);
+            //Debug.Log("보스 : " + Player.Instance.isAISlashDelay);
 
             if (!Player.Instance.isAISlashDelay) return; // 플레이어가 성공에 실패했다면 피격 x
             IngameManager.Instance.DamageBoss(1); // 임의로

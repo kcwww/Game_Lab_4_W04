@@ -25,6 +25,12 @@ public class IngameManager : MonoBehaviour
     public GameObject hitParticle;
     public GameObject slashParticle;
     public GameObject xParticle;
+    public GameObject xTurretParicle;
+    public GameObject bossParticle;
+    public GameObject slashTurretParticle;
+    public GameObject layserEffect;
+    public GameObject layserParryPlayerEffect;
+    public Layser layserParticleEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
     private const int maxPlayerHp = 10;
@@ -213,5 +219,14 @@ public class IngameManager : MonoBehaviour
         }
 
         Time.timeScale = 1f; // 보정
+    }
+
+    public void GenerateLayser(Transform pos, Vector3 target)
+    {
+        Vector3 dir = (target - pos.position).normalized;
+        Quaternion rot = Quaternion.LookRotation(dir);
+
+        Layser layser = Instantiate(layserParticleEffect.gameObject, pos.position, rot).GetComponent<Layser>();
+        layser.Shoot(target);
     }
 }

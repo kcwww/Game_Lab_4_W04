@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -25,6 +26,7 @@ public class Boss : MonoBehaviour//, IParrying
     private const string HorizontalText = "가로베기";
     private const string VerticalText = "섬광일도";
     private const string GroundSlashText = "대지참격";
+    private const string LayserText = "신기문물";
 
     [Header("Parrying")]
     public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
@@ -36,13 +38,18 @@ public class Boss : MonoBehaviour//, IParrying
     private float attackTimer = 5f; // 공격 쿨타임
     private bool isAttack = false; // 공격 중인지 체크
     private GroundSlashShooter groundSlashShooter;
+    public GameObject[] turretShaderObject; // 포탑 위치
+    public GameObject[] turretObject;
+    public Transform alter;
+    public bool[] isTurret = {true, true, true, true}; // 포탑 활성화 여부
+    private int turretCount = 4; // 현재 남은 포탑 갯수
 
     //private float horizontalSpeed = 15f; // 가로베기 이동 속도
     //private bool isHorizontal = false; // 발도 체크
     private const float radiusRange = 2f; // 대시 범위 증감량
     private const float dashRadius = 5f; // 대시 기본 범위
     private float radius = 5f; // 기본 반지름 값
-    private int patterCount = 3;
+    private int patterCount = 4;
 
     [Header("Status")]
     private float speed = 5f;
@@ -55,6 +62,8 @@ public class Boss : MonoBehaviour//, IParrying
     [Header("Hit")]
     private bool isHitDelay = false; // 현재 피격 딜레이중인가
 
+    public int turretIndex = -1;
+    
     private void Awake()
     {
         if(Instance == null) Instance = this;
@@ -133,7 +142,10 @@ public class Boss : MonoBehaviour//, IParrying
         if (curAttackTimer > 0) return;
         isAttack = true; // 공격 진행
 
-        int ran = Random.Range(0, patterCount);
+        int curPatterCount = patterCount;
+        if (turretCount == 0) curPatterCount--;
+
+        int ran = Random.Range(0, curPatterCount);
 
         /*switch (ran)
         {
@@ -146,9 +158,11 @@ public class Boss : MonoBehaviour//, IParrying
             case 2:
                 GroundSlash();
                 break;
+            case 3:
+                Layser();
+                break;
         }*/
-
-        GroundSlash();
+        Layser();
 
         curAttackTimer = attackTimer;
     }
@@ -383,6 +397,143 @@ public class Boss : MonoBehaviour//, IParrying
         isAttack = false;
     }
 
+    private void Layser()
+    {
+        anim.SetBool(HorizontalAnim, true);
+
+        StartCoroutine(LayserhRoutine());
+    }
+
+    private IEnumerator LayserhRoutine()
+    {
+        // 1. 터렛 체크
+        List<int> pivots = new List<int>();
+        
+        for(int i=0; i<4; i++)
+        {
+            if (isTurret[i]) pivots.Add(i); // 터렛이 활성화된 상태라면
+        }
+
+        int index = pivots[Random.Range(0, pivots.Count)];
+        turretIndex = index;
+
+        // 2. 방향 계산
+        Vector3 dir = (alter.position - transform.position);
+        dir.y = 0;
+        dir = dir.normalized;
+        Vector3 startPos = rb.position;
+        Vector3 endPos = alter.position + dir * 2 + new Vector3(0,2,0); // 조금 뒤에 뒤랑 위로
+
+        Player.Instance.turretPos = turretShaderObject[index].transform.position;
+        dir = (turretShaderObject[index].transform.position - transform.position);
+        dir.y = 0;
+        dir = dir.normalized;
+
+        transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+
+        IngameManager.Instance.bossParticle.transform.position = startPos;
+        IngameManager.Instance.bossParticle.SetActive(true);
+
+        float dashDuration = 0.05f; // 대시 시간
+        float elapsed = 0f;
+
+        while (elapsed < dashDuration)
+        {
+            elapsed += Time.fixedDeltaTime;
+
+            float t = elapsed / dashDuration;
+            // 처음부터 끝까지 일정하게 빠르게 (쓸림 X, 급가속 X)
+            rb.MovePosition(Vector3.Lerp(startPos, endPos, t));
+            yield return new WaitForFixedUpdate();
+        }
+
+        rb.MovePosition(endPos); // 마지막 위치 보정
+        yield return new WaitForSeconds(0.2f);
+
+        IngameManager.Instance.bossParticle.SetActive(false);
+
+        // 방향 재 갱신
+        dir = (rb.position - startPos);
+        dir.y = 0;
+        dir = dir.normalized;
+        
+        // 텍스트 실행
+
+
+        yield return new WaitForSeconds(0.3f); // 잠시 대기
+
+        foreach (var v in LayserText)
+        {
+            aiText.text += v;
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        yield return new WaitForSeconds(0.3f);
+
+        // 4. 공격 모션 실행
+        anim.SetBool(HorizontalAnim, false);
+        anim.SetTrigger(SmashAnim);
+        aiText.text = "";
+
+        IngameManager.Instance.slashTurretParticle.SetActive(true);
+        IngameManager.Instance.slashTurretParticle.transform.position = turretShaderObject[index].transform.position;
+        IngameManager.Instance.hitParticle.SetActive(true);
+        IngameManager.Instance.hitParticle.transform.position = turretShaderObject[index].transform.position;
+        IngameManager.Instance.xTurretParicle.SetActive(true);
+        IngameManager.Instance.xTurretParicle.transform.position = turretShaderObject[index].transform.position;
+
+        yield return new WaitForSeconds(1f);
+
+        IngameManager.Instance.slashTurretParticle.SetActive(false);
+        IngameManager.Instance.hitParticle.SetActive(false);
+        IngameManager.Instance.xTurretParicle.SetActive(false);
+        transform.rotation = Quaternion.LookRotation(dir, Vector3.up); // 복귀 방향 맞추기
+
+        // 5. 레이저 발사
+        IngameManager.Instance.layserEffect.SetActive(true);
+        IngameManager.Instance.layserEffect.transform.position = turretShaderObject[index].transform.position;
+
+        yield return new WaitForSeconds(1.5f); // 애니메이션 시간 대기
+
+        IngameManager.Instance.GenerateLayser(turretShaderObject[index].transform, Player.Instance.transform.position);
+        IngameManager.Instance.layserEffect.SetActive(false);
+
+
+        // 6. 전장 복귀 및 있던 자리에 파티클 생성하기
+
+        elapsed = 0f;
+
+        IngameManager.Instance.bossParticle.transform.position = transform.position;
+        IngameManager.Instance.bossParticle.SetActive(true);
+
+        // 전장 복귀
+        while (elapsed < dashDuration)
+        {
+            elapsed += Time.fixedDeltaTime;
+
+            float t = elapsed / dashDuration;
+            // 처음부터 끝까지 일정하게 빠르게 (쓸림 X, 급가속 X)
+            rb.MovePosition(Vector3.Lerp(endPos, startPos, t));
+            yield return new WaitForFixedUpdate();
+        }
+
+        rb.MovePosition(startPos);
+        IngameManager.Instance.bossParticle.SetActive(false);
+
+        //groundSlashShooter.FireAt(Player.Instance.transform);
+
+        yield return new WaitForSeconds(3.5f); // 
+
+        isAttack = false;
+    }
+
+    public void TurretRemove()
+    {
+        turretCount--;
+        turretShaderObject[turretIndex].SetActive(false);
+        turretObject[turretIndex].SetActive(false);
+        isTurret[turretIndex] = false;
+    }
 
     // 대쉬 랜덤 포인트
     private Vector3 GetRandomPoint()
@@ -416,6 +567,17 @@ public class Boss : MonoBehaviour//, IParrying
                 Player.Instance.StartParrying();
                 Player.Instance.GetEnemyPos(rb.transform);
                 StartCoroutine(HitCoroutine());
+            }
+            else //
+            {
+                if(Player.Instance.isParrying) // 아직 보정이 안끝났다면, 2차 검증
+                {
+                    ParryingDamage();
+                    InputManager.Instance.OnMotor();
+                    Player.Instance.StartParrying();
+                    Player.Instance.GetEnemyPos(rb.transform);
+                    StartCoroutine(HitCoroutine());
+                }
             }
         }
 
