@@ -46,7 +46,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     //private float horizontalSpeed = 15f; // 가로베기 이동 속도
     //private bool isHorizontal = false; // 발도 체크
-    private const float radiusRange = 2f; // 대시 범위 증감량
+    //private const float radiusRange = 2f; // 대시 범위 증감량
     private const float dashRadius = 5f; // 대시 기본 범위
     private float radius = 5f; // 기본 반지름 값
     private int patterCount = 4;
@@ -57,13 +57,16 @@ public class Boss : MonoBehaviour//, IParrying
 
     [Header("Particle")]
     private const float slashTimer = 0.5f;
+    public GameObject dashEffect;
 
 
     [Header("Hit")]
     private bool isHitDelay = false; // 현재 피격 딜레이중인가
 
     public int turretIndex = -1;
-    
+    private Vector3 dashPostion;
+
+
     private void Awake()
     {
         if(Instance == null) Instance = this;
@@ -162,7 +165,10 @@ public class Boss : MonoBehaviour//, IParrying
                 Layser();
                 break;
         }*/
-        Layser();
+
+        DashAttack();
+
+        //Layser();
 
         curAttackTimer = attackTimer;
     }
@@ -272,7 +278,6 @@ public class Boss : MonoBehaviour//, IParrying
     private IEnumerator IRandomDashAttack()
     {
         // 1. 텍스트 출력 및 대기
-        // 1. 가로 베기 텍스트 및 이펙트 실행
         foreach (var v in VerticalText)
         {
             aiText.text += v;
@@ -280,29 +285,37 @@ public class Boss : MonoBehaviour//, IParrying
         }
 
         yield return new WaitForSeconds(0.3f);
-        aiText.text = "";
 
         // 2. 방향 추출
-        Vector3 dir = GetRandomPoint();
+        Vector3 dir = GetRandomPoint() + Player.Instance.transform.position + Vector3.up;
+        dashPostion = dir;
         bool isGround = false;
+
+        Debug.Log(dir);
 
         while (!isGround)
         {
-            if (Physics.Raycast(dir + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 50f, groundMask))
+            if (Physics.Raycast(dir + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 55f, groundMask))
             {
                 isGround = true;
             }
+            else dir = GetRandomPoint() + Player.Instance.transform.position;
         }
+        aiText.text = "";
 
+        dashEffect.SetActive(true);
+         
         // 3. 이동 및 회전
-        Vector3 playerDir = (target.position - rb.position).normalized;
+        Vector3 playerDir = (dir - rb.position);
+        playerDir.y = 0;
+        playerDir.Normalize();
         Vector3 startPos = rb.position; // 지금 현재 위치
-        Vector3 endPos = target.position - playerDir; // 최종 목적지(플레이어)
+        Vector3 endPos = dir; // 최종 목적지(플레이어)
 
         // 4. 방향 고정 및 애니메이션 실행
         transform.rotation = Quaternion.LookRotation(playerDir, Vector3.up);
 
-        float dashDuration = 0.1f; // 대시 시간
+        float dashDuration = 0.5f; // 대시 시간
         float elapsed = 0f;
 
         while (elapsed < dashDuration)
@@ -310,28 +323,29 @@ public class Boss : MonoBehaviour//, IParrying
             elapsed += Time.fixedDeltaTime;
 
             float t = elapsed / dashDuration;
-            rb.MovePosition(Vector3.Lerp(startPos, dir, t));
+            rb.MovePosition(Vector3.Lerp(startPos, endPos, t));
             yield return new WaitForFixedUpdate();
         }
 
+        playerDir = (target.position - rb.position); // 마지막 방향 다시 갱신
+        playerDir.y = 0;// 도착 로테이션
+        playerDir.Normalize();
+        transform.rotation = Quaternion.LookRotation(playerDir, Vector3.up);
         yield return new WaitForSeconds(0.55f); // 이동 후 잠시 대기
 
         // 5. 플레이어로 이동
         anim.SetBool(GuardAnim, false); // 기존 애니메이션 해제
         anim.SetTrigger(DashSmashAnim);
-        playerDir = (target.position - rb.position).normalized; // 마지막 방향 다시 갱신
-        endPos = target.position - playerDir; // 마지막 위치 다시 갱신
-        transform.rotation = Quaternion.LookRotation(playerDir, Vector3.up);
 
         isParrying = true; // 패링 타격 받기
-        dashDuration = 0.3f;
+        dashDuration = 0.4f;
         elapsed = 0f;
         while (elapsed < dashDuration && !isParryingDamage)
         {
             elapsed += Time.fixedDeltaTime;
 
             float t = elapsed / dashDuration;
-            rb.MovePosition(Vector3.Lerp(dir, endPos, t));
+            rb.MovePosition(Vector3.Lerp(endPos, target.position, t));
             yield return new WaitForFixedUpdate();
         }
 
@@ -345,7 +359,6 @@ public class Boss : MonoBehaviour//, IParrying
         if (!isParryingDamage)
         {
             IngameManager.Instance.xParticle.SetActive(true);
-            rb.MovePosition(endPos);
 
             Player.Instance.Damaged(1); // 임의로
         }
@@ -355,6 +368,8 @@ public class Boss : MonoBehaviour//, IParrying
         IngameManager.Instance.slashParticle.SetActive(false);
         IngameManager.Instance.hitParticle.SetActive(false);
         IngameManager.Instance.xParticle.SetActive(false);
+        dashEffect.SetActive(false);
+
 
         //yield return new WaitForSecondsRealtime(0.1f); // 패링 유예기간
 
@@ -362,6 +377,11 @@ public class Boss : MonoBehaviour//, IParrying
         isAttack = false;
 
         yield return null;
+    }
+
+    public Vector3 GetDashPosition()
+    {
+        return dashPostion;
     }
 
     private void GroundSlash()
@@ -538,9 +558,9 @@ public class Boss : MonoBehaviour//, IParrying
     // 대쉬 랜덤 포인트
     private Vector3 GetRandomPoint()
     {
-        float angle = Random.Range(0f, 360f);
+        float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad; // 라디안 변환
 
-        radius = dashRadius + Random.Range(-radiusRange, radiusRange); // 대쉬 범위 랜덤화
+        radius = dashRadius*4; // + Random.Range(-radiusRange, radiusRange); // 대쉬 범위 랜덤화
 
         // 각도로 좌표 구하기
         Vector3 dir = new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
