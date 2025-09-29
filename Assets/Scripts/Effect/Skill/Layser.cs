@@ -69,5 +69,12 @@ public class Layser : MonoBehaviour
             IngameManager.Instance.DamageBoss(1); // 임의로
             Destroy(gameObject);
         }
+        else if(other.CompareTag("Turret")) // 터렛이라면
+        {
+            if (!Player.Instance.isAISlashDelay) return; // 플레이어가 성공에 실패했다면 피격 x
+
+            Boss.Instance.TurretRemove();
+            Destroy(gameObject);
+        }
     }
 }

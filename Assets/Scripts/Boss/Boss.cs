@@ -48,7 +48,7 @@ public class Boss : MonoBehaviour//, IParrying
     private const float radiusRange = 2f; // 대시 범위 증감량
     private const float dashRadius = 5f; // 대시 기본 범위
     private float radius = 5f; // 기본 반지름 값
-    private int patterCount = 3;
+    private int patterCount = 4;
 
     [Header("Status")]
     private float speed = 5f;
@@ -61,6 +61,8 @@ public class Boss : MonoBehaviour//, IParrying
     [Header("Hit")]
     private bool isHitDelay = false; // 현재 피격 딜레이중인가
 
+    public int turretIndex = -1;
+    
     private void Awake()
     {
         if(Instance == null) Instance = this;
@@ -144,7 +146,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         int ran = Random.Range(0, curPatterCount);
 
-        /*switch (ran)
+        switch (ran)
         {
             case 0:
                 HorizontalSmash();
@@ -155,9 +157,10 @@ public class Boss : MonoBehaviour//, IParrying
             case 2:
                 GroundSlash();
                 break;
-        }*/
-
-        Layser();
+            case 3:
+                Layser();
+                break;
+        }
 
         curAttackTimer = attackTimer;
     }
@@ -410,7 +413,7 @@ public class Boss : MonoBehaviour//, IParrying
         }
 
         int index = pivots[Random.Range(0, pivots.Count)];
-
+        turretIndex = index;
 
         // 2. 방향 계산
         Vector3 dir = (alter.position - transform.position);
@@ -488,7 +491,7 @@ public class Boss : MonoBehaviour//, IParrying
         
         // 5. 레이저 발사
         IngameManager.Instance.layserEffect.transform.position = turretObject[index].transform.position;
-        yield return new WaitForSeconds(2f); // 애니메이션 시간 대기
+        yield return new WaitForSeconds(1.5f); // 애니메이션 시간 대기
 
         IngameManager.Instance.GenerateLayser(turretObject[index].transform, Player.Instance.transform.position);
 
@@ -522,11 +525,11 @@ public class Boss : MonoBehaviour//, IParrying
         isAttack = false;
     }
 
-    public void TurretRemove(int index)
+    public void TurretRemove()
     {
         turretCount--;
-        turretObject[index].SetActive(false);
-        isTurret[index] = false;
+        turretObject[turretIndex].SetActive(false);
+        isTurret[turretIndex] = false;
     }
 
     // 대쉬 랜덤 포인트
