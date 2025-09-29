@@ -59,6 +59,7 @@ public class Boss : MonoBehaviour//, IParrying
     [Header("Particle")]
     private const float slashTimer = 0.5f;
     public GameObject dashEffect;
+    public GameObject junjoEffect;
 
 
     [Header("Hit")]
@@ -175,10 +176,12 @@ public class Boss : MonoBehaviour//, IParrying
                 break;
         }
 
+        //HorizontalSmash();
+
         //DashAttack();
 
         //Layser();
-
+        attackTimer = 1f;
         curAttackTimer = attackTimer;
     }
 
@@ -207,15 +210,20 @@ public class Boss : MonoBehaviour//, IParrying
         // 2. 방향 계산
         Vector3 dir = (target.position - transform.position).normalized;
         Vector3 startPos = rb.position;
-        Vector3 endPos = target.position - dir; // 2 정도의 거리만큼 뒤에 도착
+        Vector3 endPos = target.position - dir*2; // 2 정도의 거리만큼 뒤에 도착
 
         // 3. 방향 고정 및 애니메이션 실행
         transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-        anim.SetTrigger(SmashAnim);
+        //anim.SetTrigger(SmashAnim);
 
         isParrying = true; // 패링 타격 받기
         float dashDuration = 0.3f; // 대시 시간
         float elapsed = 0f;
+
+        float dist = Vector3.Distance(transform.position, target.position);
+        float timeToReach = (dist - Player.parryingRange) / speed;
+        bool isJunjo = false;
+        bool isSlashJunjo = false;
 
         while (elapsed < dashDuration && !isParryingDamage)
         {
@@ -224,6 +232,25 @@ public class Boss : MonoBehaviour//, IParrying
             float t = elapsed / dashDuration;
             // 처음부터 끝까지 일정하게 빠르게 (쓸림 X, 급가속 X)
             rb.MovePosition(Vector3.Lerp(startPos, endPos, t));
+
+            dist = Vector3.Distance(transform.position, target.position);
+            timeToReach = (dist - Player.parryingRange) / speed;
+
+            if(!isSlashJunjo && timeToReach <= 1.25f)
+            {
+                isSlashJunjo=true;
+                anim.SetTrigger(SmashAnim);
+            }
+
+            if (!isJunjo && timeToReach <= 0.5f)
+            {
+                isJunjo = true;
+                Time.timeScale = 0.3f;
+                yield return new WaitForSeconds(0.05f);
+                junjoEffect.SetActive(true);
+                yield return new WaitForSeconds(0.15f);
+                Time.timeScale = 1f;
+            }
             yield return new WaitForFixedUpdate();
         }
 
@@ -240,6 +267,7 @@ public class Boss : MonoBehaviour//, IParrying
             rb.MovePosition(endPos);
 
             Player.Instance.Damaged(1); // 임의로
+            Player.Instance.BackStep(rb.position);
         }
         isParrying = false;
         yield return new WaitForSeconds(slashTimer);
@@ -247,6 +275,7 @@ public class Boss : MonoBehaviour//, IParrying
         IngameManager.Instance.hitParticle.SetActive(false);
         IngameManager.Instance.xParticle.SetActive(false);
 
+        junjoEffect.SetActive(false);
         //yield return new WaitForSecondsRealtime(0.1f); // 패링 유예기간
 
         // 4. 대시 끝
@@ -370,6 +399,7 @@ public class Boss : MonoBehaviour//, IParrying
             IngameManager.Instance.xParticle.SetActive(true);
 
             Player.Instance.Damaged(1); // 임의로
+            Player.Instance.BackStep(rb.position);
         }
 
         isParrying = false;

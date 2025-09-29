@@ -183,13 +183,17 @@ public class LockOnOrchestrator : MonoBehaviour
         _didVisualFallback = false;
     }
 
+   
+
     public void OnLockOnReleased()
     {
+        Debug.Log("45545");
         // Laser 중이면 무시(패턴이 끝날 때 Deactivate에서 정리)
         if (_laserOverrideActive) return;
 
         if (selector)
         {
+            Debug.Log("455");
             selector.ClearForcedLock();
             selector.SetLockOnActive(false);
         }
@@ -199,6 +203,7 @@ public class LockOnOrchestrator : MonoBehaviour
         SwitchCameraToTPS();
         _viewMode = ViewMode.TPS;
 
+        Debug.Log("123");
         if (cameraDirectionFix) cameraDirectionFix.OnLockOffDirection();
 
         _lockOnMode = false;

@@ -176,6 +176,7 @@ public class Slime : MonoBehaviour
             rb.MovePosition(endPos);
 
             Player.Instance.Damaged(0); // 임의로
+            Player.Instance.BackStep(rb.position);
         }
         isParrying = false;
         yield return new WaitForSeconds(slashTimer);

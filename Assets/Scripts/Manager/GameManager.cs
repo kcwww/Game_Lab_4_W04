@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     public bool isTutorial { get; private set; } = true;
     public bool isStart { get; private set; } = false;
 
+    public bool isEnd { get; private set; } = false;
+
     private void Awake()
     {
         if (Instance == null)
@@ -29,4 +31,8 @@ public class GameManager : MonoBehaviour
         IngameManager.Instance.PlayBossUI();
     }
 
+    public void GameEnd()
+    {
+        isEnd = true;
+    }
 }

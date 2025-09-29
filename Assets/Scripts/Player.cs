@@ -36,8 +36,8 @@ public class Player : MonoBehaviour
     public bool isGuard { get; private set; } = false;
 
     [Header("Parrying")]
-    private const float parryingFailDistance = 0.6f; // 패링 실패 거리
-    private const float parryingRange = 4.5f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
+    private const float parryingFailDistance = 0.06f; // 패링 실패 거리
+    public const float parryingRange = 4.5f; // 패링 성공 범위거리 (실패 거리도 포함했으나, 먼저 조건을 비교하므로 사실상 실거리)
     private const float parryingAnimationTimer = 0.2f; // 애니메이션 실행 속도(패링이 지속될 시간 같은 느낌)
     private const float parryingMultiTimer = 0.1f; // 패링의 중복 튕기기 가능한 시간(다중 공격)
     private const float parryingDelayTimer = 0.5f; // 패링 딜레이 타이머
@@ -171,7 +171,10 @@ public class Player : MonoBehaviour
     private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)
     {
         if (lockOnOrchestrator.isLockOn) lockOnOrchestrator.OnLockOnReleased();
-        else lockOnOrchestrator.OnLockOnPressed();
+        else
+        {
+            lockOnOrchestrator.OnLockOnPressed();
+        }
     }
 
     private void InputManger_OnLockOff(object sender, EventArgs e)
@@ -605,5 +608,13 @@ public class Player : MonoBehaviour
         {
             isGround = true;
         }
+    }
+
+    public void BackStep(Vector3 dir)
+    {
+        dir = rb.position - dir;
+        dir.y = 0;
+
+        rb.AddForce(dir.normalized * 45, ForceMode.Impulse);
     }
 }
