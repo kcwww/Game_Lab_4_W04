@@ -25,8 +25,8 @@ public class Boss : MonoBehaviour//, IParrying
     //private const string 
     private const string HorizontalText = "가로베기";
     private const string VerticalText = "섬광일도";
-    private const string GroundSlashText = "대지참격";
-    private const string LayserText = "신기문물";
+    private const string GroundSlashText = "천산절참";
+    private const string LayserText = "성진천뢰";
 
     [Header("Parrying")]
     public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
@@ -93,6 +93,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Player_CheckParringDistance(object sender, System.EventArgs e)
     {
+        if (!GameManager.Instance.isStart) return;
         if (isHitDelay) return; // 아직 맞은 상태라면 추가 반격x
         Player.Instance.AddEnemy(rb);
     }
@@ -105,6 +106,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void FixedUpdate()
     {
+        if (!GameManager.Instance.isStart) return;
         if (isParryingDamage) return;
         Move();
         Attack();
@@ -112,7 +114,8 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Update()
     {
-        if(!isAttack)
+        if (!GameManager.Instance.isStart) return;
+        if (!isAttack)
         {
             curAttackTimer -= Time.deltaTime;
         }
@@ -120,6 +123,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Move()
     {
+        if (!GameManager.Instance.isStart) return;
         if (isAttack) return; // 공격중 실행 x
         if (Time.timeScale != 1) return;
 
@@ -291,7 +295,7 @@ public class Boss : MonoBehaviour//, IParrying
         dashPostion = dir;
         bool isGround = false;
 
-        Debug.Log(dir);
+        //sDebug.Log(dir);
 
         while (!isGround)
         {

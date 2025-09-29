@@ -133,7 +133,7 @@ public class Player : MonoBehaviour
 
         rb.AddForce(dir * 90f, ForceMode.Impulse);
 
-        IngameManager.Instance.DamageBoss(1);
+        if(GameManager.Instance.isStart) IngameManager.Instance.DamageBoss(1);
         IngameManager.Instance.CounterAttackOff(); // UI 끄기
         IngameManager.Instance.ResetTimer();
         StartCoroutine(CounterDelay());

@@ -54,7 +54,7 @@ public class IngameManager : MonoBehaviour
 
     private void Start()
     {
-        Invoke("PlayBossUI", 2f); // 5초뒤에 실행
+        //Invoke("PlayBossUI", 2f); // 5초뒤에 실행
     }
 
     // Boss UI 페이드 실행
