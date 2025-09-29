@@ -171,7 +171,10 @@ public class Player : MonoBehaviour
     private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)
     {
         if (lockOnOrchestrator.isLockOn) lockOnOrchestrator.OnLockOnReleased();
-        else lockOnOrchestrator.OnLockOnPressed();
+        else
+        {
+            lockOnOrchestrator.OnLockOnPressed();
+        }
     }
 
     private void InputManger_OnLockOff(object sender, EventArgs e)

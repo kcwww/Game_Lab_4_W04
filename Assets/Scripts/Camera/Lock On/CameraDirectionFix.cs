@@ -64,7 +64,8 @@ public class CameraDirectionFix : MonoBehaviour
         orbitalFollow.HorizontalAxis.Value = targetYaw;
 
         // 잠금 시작(축 값 유지)
-        BeginLock();
+
+        if(InputManager.Instance.connectGamePad) BeginLock();
     }
 
     /// <summary>입력 매니저의 'LockOn 해제' 이벤트에서 호출</summary>
@@ -100,7 +101,7 @@ public class CameraDirectionFix : MonoBehaviour
     void EndLock()
     {
         isPressing = false;
-        Debug.Log("444");
+        
         // 입력 축 복구
         if (axisController != null) axisController.enabled = true;
     }
