@@ -85,6 +85,11 @@ public class PostProcessingManager : MonoBehaviour
         PlayPreset(defaultPreset);
     }
 
+    public void TimeLinePulse()
+    {
+        PlayPreset(defaultPreset);
+    }
+
 
     public void PlayPreset(PostFXPreset preset)
     {
