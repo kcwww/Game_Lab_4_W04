@@ -28,10 +28,22 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         isStart = true;
-        IngameManager.Instance.PlayBossUI();
+        IngameManager.Instance.StartTimeLine();
+        //IngameManager.Instance.StopStartTimeLine();
+        //IngameManager.Instance.PlayBossUI();
     }
 
-    public void GameEnd()
+    public void GameClear()
+    {
+        GameEnd();
+    }
+    
+    public void GameOver()
+    {
+        GameEnd();
+    }
+
+    private void GameEnd()
     {
         isEnd = true;
     }

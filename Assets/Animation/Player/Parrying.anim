@@ -1176,7 +1176,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: 
+    path: Boby/LeftHand
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1188,7 +1188,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: 
+    path: Boby/LeftHand
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1200,7 +1200,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: 
+    path: Boby/LeftHand
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1248,7 +1248,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Boby/LeftHand
+    path: 
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1260,7 +1260,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Boby/LeftHand
+    path: 
     classID: 4
     script: {fileID: 0}
     flags: 0
@@ -1272,7 +1272,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Boby/LeftHand
+    path: 
     classID: 4
     script: {fileID: 0}
     flags: 0

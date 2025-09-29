@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
 
     [Header("Compnent")]
     private Rigidbody rb;
-    private Animator anim;
+    [SerializeField] private Animator anim;
     //[SerializeField] private CinemachineCamera followCamera; // 시네머신 팔로우 카메라
     [SerializeField] Camera followCamera;
     [field: SerializeField] public Transform followTarget { get; private set; }
@@ -87,7 +87,7 @@ public class Player : MonoBehaviour
         if (Instance == null) Instance = this;
 
         rb= GetComponent<Rigidbody>();
-        anim = GetComponentInChildren<Animator>();
+        //anim = GetComponentInChildren<Animator>();
         groundSlashShooter = GetComponent<GroundSlashShooter>();
 
         Cursor.visible = false;
@@ -96,6 +96,8 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
+        if (!GameManager.Instance.isTutorial) transform.position = IngameManager.Instance.startPivot.position;
+
         InputManager.Instance.OnGuard += InputManager_OnGuard;
         InputManager.Instance.OffGuard += InputManager_OffGuard;
         InputManager.Instance.OnParrying += InputManager_OnParrying;
@@ -110,6 +112,7 @@ public class Player : MonoBehaviour
 
     private void InputManager_OnCounter(object sender, EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (isHit) return;
         if (!isCounter || counterDelay) return; // 카운터 활성화가 아니라면 return;
         if (isGroundSlashParrying) // 참격이라면 초기화 후 막기
@@ -170,6 +173,7 @@ public class Player : MonoBehaviour
 
     private void InputManager_OnLockOnKeyboard(object sender, EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (lockOnOrchestrator.isLockOn) lockOnOrchestrator.OnLockOnReleased();
         else
         {
@@ -179,16 +183,19 @@ public class Player : MonoBehaviour
 
     private void InputManger_OnLockOff(object sender, EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         lockOnOrchestrator.OnLockOnReleased();
     }
 
     private void InputManger_OnLockOn(object sender, EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         lockOnOrchestrator.OnLockOnPressed();
     }
 
     private void InputManager_OnJump(object sender, EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (!isGround) return;
         isGround = false;
         rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
@@ -196,7 +203,8 @@ public class Player : MonoBehaviour
 
     // 패링 키 입력
     private void InputManager_OnParrying(object sender, EventArgs e)
-    {     
+    {
+        if (IngameManager.Instance.isTimeLine) return;
         // 1. 패링 기본 조건 파악(가드 여부)
         if (!isGuard) return; // 가드중이 아니라면 return
         if (parryingDelay) return; // 패링 쿨이 안지났다면 return
@@ -261,12 +269,14 @@ public class Player : MonoBehaviour
 
     private void InputManager_OffGuard(object sender, System.EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         isGuard = false;
         anim.SetBool(GuardAnim, isGuard);
     }
 
     private void InputManager_OnGuard(object sender, System.EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (isHit) return;
         //if (curGuardTimer > 0) return; // 가드 쿨타임
         if (isGuard) return;
@@ -278,6 +288,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (counterDelay) return;
         Move();
     }
@@ -604,6 +615,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGround = true;

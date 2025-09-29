@@ -1,8 +1,8 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Splines;
 using UnityEngine.UI;
-using static UnityEngine.ParticleSystem;
 
 public class IngameManager : MonoBehaviour
 {
@@ -34,16 +34,34 @@ public class IngameManager : MonoBehaviour
     public GameObject ExplosionEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
-    private const int maxPlayerHp = 10;
+    private const int maxPlayerHp = 10; //10
     public int bossHp { get; private set; }
-    private const int maxBossHp = 15;
+    private const int maxBossHp = 12; // 12
 
     private Coroutine sliderCoroutine;
     private Coroutine timeCoroutine;
     private Coroutine bossHitCoroutine;
 
+    [Header("Transform")]
+    public Transform startPivot;
+
+    [Header("TimeLine")]
+    public GameObject timeLineObject;
+    public bool isTimeLine = false;
+    public GameObject timeLine1;
+    public GameObject cutScene2;
+
+    public bool isGameClear = false;
+
+    public GameOverFader gameOverFade;
+    public GameOverFader gameClearFade;
+
+    public Cutscene1Pos cutPos;
+
     private void Awake()
     {
+        Time.timeScale = 1f;
+
         if (Instance == null) Instance = this;
         bossHpSlider.value = 0;
         playerHpSlider.value = 1;
@@ -96,10 +114,13 @@ public class IngameManager : MonoBehaviour
 
         playerHp -= value;
 
-        if (playerHp < 0)
+        if (playerHp <= 0)
         {
             Debug.Log("게임 오버");
-            GameManager.Instance.GameOver();
+            playerHpSlider.value = 0;
+            gameOverFade.ShowGameOver();
+            //GameManager.Instance.GameOver();
+            return;
         }
 
         if(sliderCoroutine != null) StopCoroutine(sliderCoroutine);
@@ -112,10 +133,19 @@ public class IngameManager : MonoBehaviour
     {
         bossHp -= value;
 
-        if (bossHp < 0)
+        if (bossHp <= 0)
         {
+            if (bossHpSlider.value <= 0) return; 
+            bossHpSlider.value = 0;
+            isTimeLine = true;
+            cutScene2.SetActive(true);
+            Player.Instance.transform.position = new Vector3(0, -13, 75);
+            Boss.Instance.transform.position = new Vector3(0, -13, 75);
+
             Debug.Log("게임 클리어");
-            GameManager.Instance.GameClear();
+            isGameClear = true;
+
+            return;
         }
 
         if (sliderCoroutine != null) StopCoroutine(sliderCoroutine);
@@ -124,6 +154,17 @@ public class IngameManager : MonoBehaviour
         if (bossHitCoroutine != null) StopCoroutine(bossHitCoroutine);
         bossHitCoroutine = StartCoroutine(BossHit());
     }
+
+    /*private IEnumerator GameClearRoutine()
+    {
+        cutScene2.SetActive(true);
+    }*/
+
+    public void GameClear()
+    {
+        gameClearFade.ShowGameClear();
+    }
+
 
     public IEnumerator BossHit()
     {
@@ -245,5 +286,22 @@ public class IngameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         ExplosionEffect.SetActive(false);
+    }
+
+    public void StartTimeLine()
+    {
+        playerHpSlider.gameObject.SetActive(false);
+        isTimeLine = true;
+        timeLineObject.SetActive(true);
+    }
+    
+    public void StopStartTimeLine()
+    {
+        cutPos.SetPosition();
+        isTimeLine = false;
+        timeLineObject.SetActive(false);
+        playerHpSlider.gameObject.SetActive(true);
+        //timeLine1.SetActive(false);
+        PlayBossUI();
     }
 }
