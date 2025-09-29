@@ -10164,6 +10164,7 @@ MonoBehaviour:
   layserEffect: {fileID: 1446353230}
   layserParryPlayerEffect: {fileID: 210669895}
   layserParticleEffect: {fileID: 3971442207175414263, guid: 51d01cf936ee37d468f75ddc05cc041a, type: 3}
+  ExplosionEffect: {fileID: 0}
 --- !u!1001 &129679183
 PrefabInstance:
   m_ObjectHideFlags: 0

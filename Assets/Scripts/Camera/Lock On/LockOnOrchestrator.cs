@@ -11,10 +11,16 @@ public class LockOnOrchestrator : MonoBehaviour
     public CinemachineCamera lockOnCam;
     public CameraDirectionFix cameraDirectionFix;
 
+    // ★ 추가: Laser 카메라
+    [Header("Laser Camera (optional)")]
+    public CinemachineCamera laserCam;
+
     [Header("Priorities")]
     public int priorityTPSActive = 10;
     public int priorityLockOnIdle = 5;
     public int priorityLockOnActive = 20;
+    // ★ 추가: 레이저 우선순위는 가장 높게
+    public int priorityLaserActive = 30;
 
     [Header("Auto Unlock (Logic)")]
     [Tooltip("타깃 끊겼을 때 완전 해제까지의 논리 유예(초)")]
@@ -34,21 +40,46 @@ public class LockOnOrchestrator : MonoBehaviour
 
     float _lostTimer;
     bool _lockOnMode;        // 락온 유지 중?
-    float _blendGuardTimer;  // 진입 보호
+    float _blendGuardTimer;   // 진입 보호
     bool _didVisualFallback; // 이번 상실 사이클에서 카메라만 먼저 돌렸는가
-    float _visualTimer;      // 시각 유예 타이머
+    float _visualTimer;       // 시각 유예 타이머
     bool _prevRequireOnScreen;
 
-    public bool isLockOn { get; private set; } = false; // 현재 락온 상태인지 파악하는 변수
+    public bool isLockOn { get; private set; } = false; // 현재 락온 상태인지
+
+    // ★ 추가: Laser 오버라이드 상태
+    bool _laserOverrideActive = false;
+    float _laserRemain = 0f;  // 0보다 크면 타이머 중(자동 해제용)
+
+    enum ViewMode { TPS, LockOn, Laser }
+    ViewMode _viewMode = ViewMode.TPS;
 
     void Start()
     {
         if (tpsCam) tpsCam.Priority = priorityTPSActive;
         if (lockOnCam) lockOnCam.Priority = priorityLockOnIdle;
+        if (laserCam) laserCam.Priority = priorityLockOnIdle - 1; // 가장 낮게 시작
+        _viewMode = ViewMode.TPS;
     }
 
     void Update()
     {
+        // ── Laser 오버라이드가 켜져 있으면 우선 처리 ──
+        if (_laserOverrideActive)
+        {
+            if (_laserRemain > 0f)
+            {
+                _laserRemain -= Time.deltaTime;
+                if (_laserRemain <= 0f)
+                {
+                    // 자동 복귀
+                    DeactivateLaserCamera();
+                }
+            }
+            // Laser 중엔 나머지 락온 유지/상실 로직 무시
+            return;
+        }
+
         // ── 블렌드 가드 ──
         if (_blendGuardTimer > 0f)
         {
@@ -74,9 +105,9 @@ public class LockOnOrchestrator : MonoBehaviour
                     _visualTimer += Time.deltaTime;
                     if (_visualTimer >= Mathf.Max(0f, visualGraceSeconds))
                     {
-                        // 카메라만 먼저 TPS로 복귀
                         SwitchCameraToTPS();
                         _didVisualFallback = true;
+                        _viewMode = ViewMode.TPS;
                     }
                 }
 
@@ -94,9 +125,9 @@ public class LockOnOrchestrator : MonoBehaviour
                 _visualTimer = 0f;
                 if (_didVisualFallback)
                 {
-                    // 시각적으로 TPS로 내려갔었다면, 다시 LockOn 카메라로 복귀
                     SwitchCameraToLockOn();
                     _didVisualFallback = false;
+                    _viewMode = ViewMode.LockOn;
                 }
             }
         }
@@ -106,6 +137,9 @@ public class LockOnOrchestrator : MonoBehaviour
 
     public void OnLockOnPressed()
     {
+        // Laser 중이면 무시(패턴 우선)
+        if (_laserOverrideActive) return;
+
         if (detector) detector.ForceScan();
         if (selector) selector.SetLockOnActive(true);
 
@@ -117,6 +151,7 @@ public class LockOnOrchestrator : MonoBehaviour
             if (cameraDirectionFix) cameraDirectionFix.OnLockOnDirection();
 
             SwitchCameraToTPS();
+            _viewMode = ViewMode.TPS;
 
             _lockOnMode = false;
             isLockOn = false;
@@ -139,6 +174,7 @@ public class LockOnOrchestrator : MonoBehaviour
         if (cameraDirectionFix) cameraDirectionFix.OnLockOffDirection();
 
         SwitchCameraToLockOn();
+        _viewMode = ViewMode.LockOn;
 
         _lockOnMode = true;
         isLockOn = true;
@@ -149,6 +185,9 @@ public class LockOnOrchestrator : MonoBehaviour
 
     public void OnLockOnReleased()
     {
+        // Laser 중이면 무시(패턴이 끝날 때 Deactivate에서 정리)
+        if (_laserOverrideActive) return;
+
         if (selector)
         {
             selector.ClearForcedLock();
@@ -158,6 +197,7 @@ public class LockOnOrchestrator : MonoBehaviour
             detector.requireOnScreen = _prevRequireOnScreen;
 
         SwitchCameraToTPS();
+        _viewMode = ViewMode.TPS;
 
         if (cameraDirectionFix) cameraDirectionFix.OnLockOffDirection();
 
@@ -172,13 +212,75 @@ public class LockOnOrchestrator : MonoBehaviour
     // ── 카메라 스위치 유틸 ──
     void SwitchCameraToTPS()
     {
+        if (laserCam) laserCam.Priority = priorityLockOnIdle - 1;
         if (lockOnCam) lockOnCam.Priority = priorityLockOnIdle;
         if (tpsCam) tpsCam.Priority = priorityTPSActive;
     }
 
     void SwitchCameraToLockOn()
     {
+        if (laserCam) laserCam.Priority = priorityLockOnIdle - 1;
         if (lockOnCam) lockOnCam.Priority = priorityLockOnActive;
         if (tpsCam) tpsCam.Priority = priorityTPSActive - 1;
+    }
+
+    // ★ 추가: Laser 카메라로 전환(외부에서 호출)
+    // durationSec > 0 이면 자동 해제; <=0 이면 수동 Deactivate까지 유지
+    public void ActivateLaserCamera(float durationSec = 0f)
+    {
+        if (!laserCam)
+        {
+            Debug.LogWarning("[LockOnOrchestrator] Laser camera is not assigned.");
+            return;
+        }
+
+        // 우선순위 스위치
+        if (laserCam) laserCam.Priority = priorityLaserActive;
+        if (lockOnCam) lockOnCam.Priority = priorityLockOnIdle;
+        if (tpsCam) tpsCam.Priority = priorityLockOnIdle;
+
+        // 상태 플래그
+        _laserOverrideActive = true;
+        _laserRemain = Mathf.Max(0f, durationSec);
+        _viewMode = ViewMode.Laser;
+
+        // 락온 UI/논리는 잠시 멈춤(선택: 유지해도 됨)
+        // 시각적으로 즉시 전환되도록 가드/플래그 초기화
+        _didVisualFallback = false;
+        _blendGuardTimer = 0f;
+        _lostTimer = 0f;
+        _visualTimer = 0f;
+    }
+
+    // ★ 추가: Laser 카메라 해제(외부에서 호출 또는 자동)
+    public void DeactivateLaserCamera()
+    {
+        if (!_laserOverrideActive) return;
+
+        _laserOverrideActive = false;
+        _laserRemain = 0f;
+
+        // 레이저 종료 후 “원래 의도된 뷰”로 복귀
+        if (_lockOnMode && selector != null && selector.lockOnActive && selector.CurrentTarget != null)
+        {
+            SwitchCameraToLockOn();
+            _viewMode = ViewMode.LockOn;
+        }
+        else
+        {
+            SwitchCameraToTPS();
+            _viewMode = ViewMode.TPS;
+        }
+    }
+
+    // ★ 추가: 외부에서 특정 카메라를 강제 활성화하고 싶을 때(범용)
+    public void SwitchToCamera(CinemachineCamera cam, int activePriority)
+    {
+        // 전부 낮춘 뒤 주어진 cam만 올려주는 간단한 유틸
+        if (tpsCam) tpsCam.Priority = priorityLockOnIdle;
+        if (lockOnCam) lockOnCam.Priority = priorityLockOnIdle;
+        if (laserCam) laserCam.Priority = priorityLockOnIdle - 1;
+
+        if (cam) cam.Priority = activePriority;
     }
 }
