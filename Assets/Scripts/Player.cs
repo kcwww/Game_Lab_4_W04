@@ -78,6 +78,10 @@ public class Player : MonoBehaviour
     public bool isGroundSlashParrying = false; // 참격이 성공했는가
     public Vector3 turretPos = Vector3.zero;
 
+    [Header("Particle")]
+    public GameObject playerSting;
+    public GameObject stingHit;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -112,6 +116,9 @@ public class Player : MonoBehaviour
         {
             counterDelay = false;
             isCounter = false;
+            isSlashParrying = false;
+            IngameManager.Instance.CounterAttackOff(); // UI 끄기
+            IngameManager.Instance.ResetTimer();
             return; // 참격만 반격중이면 리턴
         }
 
@@ -121,17 +128,37 @@ public class Player : MonoBehaviour
         isCounter = false;
 
         anim.SetTrigger(StingAnim); // 스팅 애니메이션 실행
+        StartCoroutine(StartSting());
 
-        if (enemyPos == null) return;
-        Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
-        dir.Normalize();
+        if (enemyPos != null)
+        {
+            Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
+            dir.Normalize();
 
-        rb.AddForce(dir * 90f, ForceMode.Impulse);
+            rb.AddForce(dir * 90f, ForceMode.Impulse);
 
-        IngameManager.Instance.DamageBoss(1);
+            if (GameManager.Instance.isStart) IngameManager.Instance.DamageBoss(1);
+        }
+
         IngameManager.Instance.CounterAttackOff(); // UI 끄기
         IngameManager.Instance.ResetTimer();
         StartCoroutine(CounterDelay());
+    }
+
+    private IEnumerator StartSting()
+    {
+        playerSting.SetActive(true);
+        //GameObject g = Instantiate(playerSting, followTarget.position, Quaternion.identity);
+       // g.SetActive(true);
+        //g.transform.Rotate(new Vector3(-90, 0, 0));
+        stingHit.SetActive(true);
+
+        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
+        playerSting.SetActive(false);
+
+        yield return new WaitForSeconds(1f);
+        stingHit.SetActive(false);
     }
 
     private IEnumerator CounterDelay()
@@ -564,6 +591,7 @@ public class Player : MonoBehaviour
     {
         isSlashDelay = true;
         IngameManager.Instance.GenerateLayser(transform, turretPos);
+        IngameManager.Instance.layserParryPlayerEffect.SetActive(true);
         IngameManager.Instance.layserParryPlayerEffect.transform.position = transform.position;
 
         yield return new WaitForSeconds(0.5f);

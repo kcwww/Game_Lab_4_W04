@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -103,5 +104,16 @@ public class TPSCamera : MonoBehaviour
     public void OffRotation()
     {
         inputAxis.enabled = false;
+
+        if (resetRotationCoroutine != null) StopCoroutine(resetRotationCoroutine);
+        resetRotationCoroutine = StartCoroutine(ResetRotation());
+    }
+
+    private Coroutine resetRotationCoroutine;
+
+    private IEnumerator ResetRotation()
+    {
+        yield return new WaitForSeconds(1.5f);
+        OnRotation();
     }
 }

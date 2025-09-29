@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class Boss : MonoBehaviour//, IParrying
@@ -25,8 +26,8 @@ public class Boss : MonoBehaviour//, IParrying
     //private const string 
     private const string HorizontalText = "가로베기";
     private const string VerticalText = "섬광일도";
-    private const string GroundSlashText = "대지참격";
-    private const string LayserText = "신기문물";
+    private const string GroundSlashText = "천산절참";
+    private const string LayserText = "성진천뢰";
 
     [Header("Parrying")]
     public bool isParrying { get; private set; } = false; // 플레이어 패링 성공 여부
@@ -63,6 +64,10 @@ public class Boss : MonoBehaviour//, IParrying
     [Header("Hit")]
     private bool isHitDelay = false; // 현재 피격 딜레이중인가
 
+    // camera setting
+    [SerializeField] private LockOnOrchestrator orchestrator;
+    
+
     public int turretIndex = -1;
     private Vector3 dashPostion;
 
@@ -93,6 +98,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Player_CheckParringDistance(object sender, System.EventArgs e)
     {
+        if (!GameManager.Instance.isStart) return;
         if (isHitDelay) return; // 아직 맞은 상태라면 추가 반격x
         Player.Instance.AddEnemy(rb);
     }
@@ -105,6 +111,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void FixedUpdate()
     {
+        if (!GameManager.Instance.isStart) return;
         if (isParryingDamage) return;
         Move();
         Attack();
@@ -112,7 +119,8 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Update()
     {
-        if(!isAttack)
+        if (!GameManager.Instance.isStart) return;
+        if (!isAttack)
         {
             curAttackTimer -= Time.deltaTime;
         }
@@ -120,6 +128,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Move()
     {
+        if (!GameManager.Instance.isStart) return;
         if (isAttack) return; // 공격중 실행 x
         if (Time.timeScale != 1) return;
 
@@ -150,7 +159,7 @@ public class Boss : MonoBehaviour//, IParrying
 
         int ran = Random.Range(0, curPatterCount);
 
-        /*switch (ran)
+        switch (ran)
         {
             case 0:
                 HorizontalSmash();
@@ -164,11 +173,11 @@ public class Boss : MonoBehaviour//, IParrying
             case 3:
                 Layser();
                 break;
-        }*/
+        }
 
         //DashAttack();
 
-        Layser();
+        //Layser();
 
         curAttackTimer = attackTimer;
     }
@@ -291,7 +300,7 @@ public class Boss : MonoBehaviour//, IParrying
         dashPostion = dir;
         bool isGround = false;
 
-        Debug.Log(dir);
+        //sDebug.Log(dir);
 
         while (!isGround)
         {
@@ -419,6 +428,8 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Layser()
     {
+        GetComponent<LockableTarget>().isLockable = false;
+
         anim.SetBool(HorizontalAnim, true);
 
         StartCoroutine(LayserhRoutine());
@@ -436,6 +447,10 @@ public class Boss : MonoBehaviour//, IParrying
 
         int index = pivots[Random.Range(0, pivots.Count)];
         turretIndex = index;
+
+        // ★ 레이저 카메라 모드로 전환
+        orchestrator.ActivateLaserCamera();
+
 
         // 2. 방향 계산
         Vector3 dir = (alter.position - transform.position);
@@ -540,11 +555,20 @@ public class Boss : MonoBehaviour//, IParrying
         rb.MovePosition(startPos);
         IngameManager.Instance.bossParticle.SetActive(false);
 
+        StartCoroutine(LayserEnd());
+
         //groundSlashShooter.FireAt(Player.Instance.transform);
 
         yield return new WaitForSeconds(3.5f); // 
 
         isAttack = false;
+    }
+
+    IEnumerator LayserEnd()
+    {
+        yield return new WaitForSeconds(0.5f);
+        GetComponent<LockableTarget>().isLockable = true;
+        orchestrator.DeactivateLaserCamera();
     }
 
     public void TurretRemove()

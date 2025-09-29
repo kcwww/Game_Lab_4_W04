@@ -71,7 +71,7 @@ public class GroupFramingDistanceDriver : MonoBehaviour
         
 
         float d = Vector3.Distance(a, b);
-        Debug.Log($"[GroupFramingDistanceDriver] d={d}");
+        
         
 
         // 0~1 정규화
@@ -99,7 +99,6 @@ public class GroupFramingDistanceDriver : MonoBehaviour
         if (groupFraming)
         {
             groupFraming.FramingSize = _curSize;
-            Debug.Log($"[GroupFramingDistanceDriver] size={_curSize}" );
         }
         else
         {

@@ -47,6 +47,16 @@ public class LockOnSelector : MonoBehaviour
         // 우선 카메라 참조 갱신
         var cam = viewCamera != null ? viewCamera : (detector.viewCamera != null ? detector.viewCamera : Camera.main);
 
+        // (A) 현재 타깃이 lockable 아닌 상태로 바뀌었으면 즉시 해제
+        if (_currentTarget != null)
+        {
+            var curLt = GetLockable(_currentTarget);
+            if (curLt == null || !curLt.isLockable)
+            {
+                SetTarget(null, cam);
+            }
+        }
+
         // 후보가 하나도 없으면 클리어
         var candidates = detector.Candidates;
         if (candidates == null || candidates.Count == 0)
@@ -55,11 +65,19 @@ public class LockOnSelector : MonoBehaviour
             return;
         }
 
-        // 외부에서 강제 고정 요청이 있으면 우선
+        // (B) 외부 강제 고정이 있어도 lockable=false면 무시/해제
         if (lockedTargetOverride != null)
         {
-            SetTarget(lockedTargetOverride, cam);
-            return;
+            var forcedLt = GetLockable(lockedTargetOverride);
+            if (forcedLt != null && forcedLt.isLockable)
+            {
+                SetTarget(lockedTargetOverride, cam);
+                return;
+            }
+            else
+            {
+                lockedTargetOverride = null; // 강제 해제
+            }
         }
 
         // 점수화: 화면 중앙 근접 + 거리 역가중 + 스티키 + 타깃 바이어스
@@ -97,7 +115,6 @@ public class LockOnSelector : MonoBehaviour
             // 히스테리시스: 쿨다운 동안은 지금 타깃을 쉽게 내리지 않음
             if (Time.time < _lastSwitchTime + switchCooldown && _currentTarget != null && t != _currentTarget)
             {
-                // 상대 후보의 스코어를 살짝 낮춰보는 효과 (부드럽게 유지)
                 score -= switchThreshold * 0.5f;
             }
 
@@ -106,6 +123,13 @@ public class LockOnSelector : MonoBehaviour
                 bestScore = score;
                 best = t;
             }
+        }
+
+        // (C) 유효 후보가 하나도 없으면 즉시 해제
+        if (best == null)
+        {
+            SetTarget(null, cam);
+            return;
         }
 
         // 전환 임계 충족 시에만 바꿈
@@ -127,6 +151,7 @@ public class LockOnSelector : MonoBehaviour
             RefreshVisual(_currentTarget, cam);
         }
     }
+
 
     // 현재 타깃 변경 + 화살표 on/off
     void SetTarget(Transform newTarget, Camera cam)
