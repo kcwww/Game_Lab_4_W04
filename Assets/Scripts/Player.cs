@@ -289,7 +289,7 @@ public class Player : MonoBehaviour
         // 1) 이동축은 항상 카메라 기준
         Vector3 camFwd = Vector3.ProjectOnPlane(followCamera.transform.forward, up).normalized;
         Vector3 camRight = Vector3.ProjectOnPlane(followCamera.transform.right, up).normalized;
-        Debug.Log(followCamera);
+        
 
         Vector3 inputDir = (camRight * dir.x + camFwd * dir.y);
 

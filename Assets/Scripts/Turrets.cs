@@ -4,6 +4,9 @@ public class Turrets : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag(""))
+        if (other.CompareTag(""))
+        {
+
+        }
     }
 }
