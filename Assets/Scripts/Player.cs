@@ -78,6 +78,10 @@ public class Player : MonoBehaviour
     public bool isGroundSlashParrying = false; // 참격이 성공했는가
     public Vector3 turretPos = Vector3.zero;
 
+    [Header("Particle")]
+    public GameObject playerSting;
+    public GameObject stingHit;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -121,6 +125,7 @@ public class Player : MonoBehaviour
         isCounter = false;
 
         anim.SetTrigger(StingAnim); // 스팅 애니메이션 실행
+        StartCoroutine(StartSting());
 
         if (enemyPos == null) return;
         Vector3 dir = enemyPos.position - rb.position; // 적 방향 계산
@@ -132,6 +137,20 @@ public class Player : MonoBehaviour
         IngameManager.Instance.CounterAttackOff(); // UI 끄기
         IngameManager.Instance.ResetTimer();
         StartCoroutine(CounterDelay());
+    }
+
+    private IEnumerator StartSting()
+    {
+        playerSting.SetActive(true);
+        //stingHit.SetActive(true);
+        stingHit.SetActive(true);
+
+        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
+        playerSting.SetActive(false);
+
+        yield return new WaitForSeconds(1f);
+        stingHit.SetActive(false);
     }
 
     private IEnumerator CounterDelay()
