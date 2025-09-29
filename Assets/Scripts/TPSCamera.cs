@@ -43,6 +43,7 @@ public class TPSCamera : MonoBehaviour
 
     private void Update()
     {
+        if (IngameManager.Instance.isTimeLine) return;
         // 1. 거리 계싼
         Vector3 dir = Player.Instance.transform.position - transform.position;
         float distance = dir.magnitude;

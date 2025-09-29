@@ -9,7 +9,7 @@ public class Boss : MonoBehaviour//, IParrying
     public static Boss Instance { get; private set; }
 
     [Header("Compenent")]
-    private Animator anim;
+    [SerializeField] private Animator anim;
     private Rigidbody rb;
     private Transform target;
     [SerializeField] private LayerMask groundMask;
@@ -77,7 +77,7 @@ public class Boss : MonoBehaviour//, IParrying
     {
         if(Instance == null) Instance = this;
 
-        anim = GetComponentInChildren<Animator>();
+        //anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
         groundSlashShooter = GetComponent<GroundSlashShooter>();
         aiText.text = ""; // 문구 비활성화
@@ -99,6 +99,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Player_CheckParringDistance(object sender, System.EventArgs e)
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (!GameManager.Instance.isStart) return;
         if (isHitDelay) return; // 아직 맞은 상태라면 추가 반격x
         Player.Instance.AddEnemy(rb);
@@ -112,6 +113,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void FixedUpdate()
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (!GameManager.Instance.isStart) return;
         if (isParryingDamage) return;
         Move();
@@ -120,6 +122,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Update()
     {
+        if (IngameManager.Instance.isTimeLine) return;
         if (!GameManager.Instance.isStart) return;
         if (!isAttack)
         {
@@ -129,7 +132,6 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Move()
     {
-        if (!GameManager.Instance.isStart) return;
         if (isAttack) return; // 공격중 실행 x
         if (Time.timeScale != 1) return;
 
@@ -631,7 +633,9 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Parrying"))
+        if (IngameManager.Instance.isTimeLine) return;
+
+        if (other.CompareTag("Parrying"))
         {
             if (Player.Instance.parryingSucces) // 판정 성공일때만 진행
             {

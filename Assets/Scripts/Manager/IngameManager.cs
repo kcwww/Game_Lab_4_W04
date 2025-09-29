@@ -42,6 +42,13 @@ public class IngameManager : MonoBehaviour
     private Coroutine timeCoroutine;
     private Coroutine bossHitCoroutine;
 
+    [Header("Transform")]
+    public Transform startPivot;
+
+    [Header("TimeLine")]
+    public GameObject timeLineObject;
+    public bool isTimeLine = false;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -245,5 +252,20 @@ public class IngameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         ExplosionEffect.SetActive(false);
+    }
+
+    public void StartTimeLine()
+    {
+        playerHpSlider.gameObject.SetActive(false);
+        isTimeLine = true;
+        timeLineObject.SetActive(true);
+    }
+    
+    public void StopStartTimeLine()
+    {
+        isTimeLine = false;
+        timeLineObject.SetActive(false);
+        playerHpSlider.gameObject.SetActive(true);
+        PlayBossUI();
     }
 }
