@@ -1192,6 +1192,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   aiText: {fileID: 6189212601359305365}
+  turretShaderObject: []
+  turretObject: []
+  alter: {fileID: 0}
+  isTurret: 01010101
+  dashEffect: {fileID: 0}
+  turretIndex: -1
 --- !u!114 &3745419188439643057
 MonoBehaviour:
   m_ObjectHideFlags: 0

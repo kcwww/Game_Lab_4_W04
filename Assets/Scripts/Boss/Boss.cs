@@ -419,6 +419,8 @@ public class Boss : MonoBehaviour//, IParrying
 
     private void Layser()
     {
+        GetComponent<LockableTarget>().isLockable = false;
+
         anim.SetBool(HorizontalAnim, true);
 
         StartCoroutine(LayserhRoutine());
@@ -539,6 +541,8 @@ public class Boss : MonoBehaviour//, IParrying
 
         rb.MovePosition(startPos);
         IngameManager.Instance.bossParticle.SetActive(false);
+
+        GetComponent<LockableTarget>().isLockable = true;
 
         //groundSlashShooter.FireAt(Player.Instance.transform);
 

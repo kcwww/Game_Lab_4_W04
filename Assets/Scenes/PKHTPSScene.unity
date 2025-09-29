@@ -10164,6 +10164,7 @@ MonoBehaviour:
   layserEffect: {fileID: 1446353230}
   layserParryPlayerEffect: {fileID: 210669895}
   layserParticleEffect: {fileID: 3971442207175414263, guid: 51d01cf936ee37d468f75ddc05cc041a, type: 3}
+  ExplosionEffect: {fileID: 0}
 --- !u!1001 &129679183
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15746,6 +15747,14 @@ PrefabInstance:
       propertyPath: 'turretShaderObject.Array.data[3]'
       value: 
       objectReference: {fileID: 982880324}
+    - target: {fileID: 1982116154917859776, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4031619731736815814, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -5491780849873737984, guid: a222dd7fcba44ad44ab0d98c954612e5, type: 3}
     - target: {fileID: 4534312552231550247, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -15785,6 +15794,26 @@ PrefabInstance:
     - target: {fileID: 4534312552231550247, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5034143262869770321, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5034143262869770321, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5034143262869770321, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 5034143262869770321, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 5034143262869770321, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 6235559748465300777, guid: af066f9ab00fd9242ae45fc3cd48f342, type: 3}
       propertyPath: m_Name
