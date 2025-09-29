@@ -142,7 +142,9 @@ public class Player : MonoBehaviour
     private IEnumerator StartSting()
     {
         playerSting.SetActive(true);
-        //stingHit.SetActive(true);
+        //GameObject g = Instantiate(playerSting, followTarget.position, Quaternion.identity);
+       // g.SetActive(true);
+        //g.transform.Rotate(new Vector3(-90, 0, 0));
         stingHit.SetActive(true);
 
         yield return new WaitForSeconds(1f);
