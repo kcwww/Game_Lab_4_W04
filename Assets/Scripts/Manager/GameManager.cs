@@ -5,7 +5,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public bool isTutorial { get; private set; } = true;
-    public bool isStart { get; private set; } = false;
+    public bool isStart = false;
 
     public bool isEnd { get; private set; } = false;
 
