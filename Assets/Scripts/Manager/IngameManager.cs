@@ -99,6 +99,7 @@ public class IngameManager : MonoBehaviour
         if (playerHp < 0)
         {
             Debug.Log("게임 오버");
+            GameManager.Instance.GameOver();
         }
 
         if(sliderCoroutine != null) StopCoroutine(sliderCoroutine);
@@ -114,6 +115,7 @@ public class IngameManager : MonoBehaviour
         if (bossHp < 0)
         {
             Debug.Log("게임 클리어");
+            GameManager.Instance.GameClear();
         }
 
         if (sliderCoroutine != null) StopCoroutine(sliderCoroutine);
