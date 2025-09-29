@@ -63,6 +63,8 @@ public class Boss : MonoBehaviour//, IParrying
     [Header("Hit")]
     private bool isHitDelay = false; // 현재 피격 딜레이중인가
 
+    [SerializeField] private LockOnOrchestrator orchestrator;
+
     public int turretIndex = -1;
     private Vector3 dashPostion;
 
@@ -420,6 +422,7 @@ public class Boss : MonoBehaviour//, IParrying
     private void Layser()
     {
         GetComponent<LockableTarget>().isLockable = false;
+        orchestrator.ActivateLaserCamera(); // 유지
 
         anim.SetBool(HorizontalAnim, true);
 
@@ -542,13 +545,20 @@ public class Boss : MonoBehaviour//, IParrying
         rb.MovePosition(startPos);
         IngameManager.Instance.bossParticle.SetActive(false);
 
-        GetComponent<LockableTarget>().isLockable = true;
+        StartCoroutine(LayserEnd());
 
         //groundSlashShooter.FireAt(Player.Instance.transform);
 
         yield return new WaitForSeconds(3.5f); // 
 
         isAttack = false;
+    }
+
+    IEnumerator LayserEnd()
+    {
+        yield return new WaitForSeconds(1f);
+        GetComponent<LockableTarget>().isLockable = true;
+        orchestrator.DeactivateLaserCamera();
     }
 
     public void TurretRemove()
