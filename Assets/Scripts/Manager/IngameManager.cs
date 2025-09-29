@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Splines;
 using UnityEngine.UI;
@@ -116,9 +117,13 @@ public class IngameManager : MonoBehaviour
 
         if (playerHp <= 0)
         {
+            GameManager.Instance.isStart = false;
             Debug.Log("게임 오버");
             playerHpSlider.value = 0;
+            playerHpSlider.gameObject.SetActive(false);
+            bossHpSlider.gameObject.SetActive(false);
             gameOverFade.ShowGameOver();
+
             //GameManager.Instance.GameOver();
             return;
         }
@@ -138,6 +143,8 @@ public class IngameManager : MonoBehaviour
             if (bossHpSlider.value <= 0) return; 
             bossHpSlider.value = 0;
             isTimeLine = true;
+            playerHpSlider.gameObject.SetActive(false);
+            bossHpSlider.gameObject.SetActive(false);
             cutScene2.SetActive(true);
             Player.Instance.transform.position = new Vector3(0, -13, 75);
             Boss.Instance.transform.position = new Vector3(0, -13, 75);
