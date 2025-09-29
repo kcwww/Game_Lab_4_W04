@@ -8,7 +8,7 @@ TagManager:
   - Parrying
   - Enemy
   - Turret
-  - Card
+  - CutScene
   layers:
   - Default
   - TransparentFX
