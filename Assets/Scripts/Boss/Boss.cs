@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class Boss : MonoBehaviour//, IParrying
@@ -63,7 +64,9 @@ public class Boss : MonoBehaviour//, IParrying
     [Header("Hit")]
     private bool isHitDelay = false; // 현재 피격 딜레이중인가
 
+    // camera setting
     [SerializeField] private LockOnOrchestrator orchestrator;
+    
 
     public int turretIndex = -1;
     private Vector3 dashPostion;
@@ -426,7 +429,6 @@ public class Boss : MonoBehaviour//, IParrying
     private void Layser()
     {
         GetComponent<LockableTarget>().isLockable = false;
-        orchestrator.ActivateLaserCamera(); // 유지
 
         anim.SetBool(HorizontalAnim, true);
 
@@ -445,6 +447,10 @@ public class Boss : MonoBehaviour//, IParrying
 
         int index = pivots[Random.Range(0, pivots.Count)];
         turretIndex = index;
+
+        // ★ 레이저 카메라 모드로 전환
+        orchestrator.ActivateLaserCamera();
+
 
         // 2. 방향 계산
         Vector3 dir = (alter.position - transform.position);
@@ -560,7 +566,7 @@ public class Boss : MonoBehaviour//, IParrying
 
     IEnumerator LayserEnd()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
         GetComponent<LockableTarget>().isLockable = true;
         orchestrator.DeactivateLaserCamera();
     }

@@ -260,18 +260,26 @@ public class LockOnOrchestrator : MonoBehaviour
         _laserOverrideActive = false;
         _laserRemain = 0f;
 
-        // 레이저 종료 후 “원래 의도된 뷰”로 복귀
-        if (_lockOnMode && selector != null && selector.lockOnActive && selector.CurrentTarget != null)
+        // 항상 TPS로 복귀
+        SwitchCameraToTPS();
+        _viewMode = ViewMode.TPS;
+
+        // (선택) 락온 상태도 강제 해제하고 싶다면 주석 해제
+        if (selector)
         {
-            SwitchCameraToLockOn();
-            _viewMode = ViewMode.LockOn;
+            selector.ClearForcedLock();
+            selector.SetLockOnActive(false);
         }
-        else
-        {
-            SwitchCameraToTPS();
-            _viewMode = ViewMode.TPS;
-        }
+        _lockOnMode = false;
+        isLockOn = false;
+
+        // (선택)내부 타이머 / 플래그도 리셋
+        _lostTimer = 0f;
+        _visualTimer = 0f;
+        _didVisualFallback = false;
+        _blendGuardTimer = 0f;
     }
+
 
     // ★ 추가: 외부에서 특정 카메라를 강제 활성화하고 싶을 때(범용)
     public void SwitchToCamera(CinemachineCamera cam, int activePriority)
