@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Splines;
 using UnityEngine.UI;
 
 public class IngameManager : MonoBehaviour
@@ -33,9 +34,9 @@ public class IngameManager : MonoBehaviour
     public GameObject ExplosionEffect;
    // public GameObject groundSlashParticle;
     public int playerHp { get; private set; }
-    private const int maxPlayerHp = 1; //10
+    private const int maxPlayerHp = 10; //10
     public int bossHp { get; private set; }
-    private const int maxBossHp = 2; // 12
+    private const int maxBossHp = 12; // 12
 
     private Coroutine sliderCoroutine;
     private Coroutine timeCoroutine;
@@ -55,7 +56,7 @@ public class IngameManager : MonoBehaviour
     public GameOverFader gameOverFade;
     public GameOverFader gameClearFade;
 
-
+    public Cutscene1Pos cutPos;
 
     private void Awake()
     {
@@ -138,6 +139,8 @@ public class IngameManager : MonoBehaviour
             bossHpSlider.value = 0;
             isTimeLine = true;
             cutScene2.SetActive(true);
+            Player.Instance.transform.position = new Vector3(0, -13, 75);
+            Boss.Instance.transform.position = new Vector3(0, -13, 75);
 
             Debug.Log("게임 클리어");
             isGameClear = true;
@@ -285,19 +288,20 @@ public class IngameManager : MonoBehaviour
         ExplosionEffect.SetActive(false);
     }
 
-    /*public void StartTimeLine()
+    public void StartTimeLine()
     {
         playerHpSlider.gameObject.SetActive(false);
         isTimeLine = true;
         timeLineObject.SetActive(true);
-    }*/
+    }
     
     public void StopStartTimeLine()
     {
+        cutPos.SetPosition();
         isTimeLine = false;
         timeLineObject.SetActive(false);
         playerHpSlider.gameObject.SetActive(true);
-        timeLine1.SetActive(false);
+        //timeLine1.SetActive(false);
         PlayBossUI();
     }
 }
